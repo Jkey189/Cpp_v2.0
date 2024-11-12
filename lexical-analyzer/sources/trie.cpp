@@ -1,7 +1,7 @@
 #include "../headers/trie.h"
 
 
-inline bool Trie::find(std::string& str) const {
+bool Trie::find(std::string& str) const {
   Word* v = root;
 
   for (auto ch : str) {
@@ -14,7 +14,7 @@ inline bool Trie::find(std::string& str) const {
   return true;
 }
 
-inline void Trie::insert(std::string& str) const {
+void Trie::insert(std::string& str) const {
   Word* v = root;
 
   ++v->termCount;

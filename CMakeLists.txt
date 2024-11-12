@@ -16,5 +16,4 @@ add_executable(Language
         lexical-analyzer/sources/trie.cpp
         lexical-analyzer/sources/tokens.cpp
         lexical-analyzer/sources/lexer.cpp
-        lexical-analyzer/sources/main.cpp
 )

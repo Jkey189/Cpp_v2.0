@@ -16,8 +16,8 @@ public:
   bool find(std::string&) const;
   void insert(std::string&) const;
 
+
 private:
-  __int64 cnt = 0;
   Word* root = new Word();
 };
 

@@ -1,5 +1,4 @@
 array<int> a;
-
 int n;
 cin >> n;
 a.resize(n);

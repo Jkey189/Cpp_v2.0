@@ -68,3 +68,66 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
   return tokens;
 }
 
+Token LexicalAnalyzer::getLex() {
+  const char currChar = program_[position_];
+
+  if (isSpace(currChar) || isEnter(currChar)) {
+    ++position_;
+  }
+
+  if (position_ >= program_.size()) {
+    return {TokenType::END, ""};
+  }
+
+  if (isDigit(currChar)) {
+    parseNumber();
+  }
+
+  if (isAlpha(currChar)) {
+    parseIdentifier();
+  }
+
+  switch (currChar) {
+    case '(':
+      return {TokenType::LPAREN, "("};
+    case ')':
+      return {TokenType::RPAREN, ")"};
+    case '{':
+      return {TokenType::LBRACE, "{"};
+    case '}':
+      return {TokenType::RBRACE, "}"};
+    case '[':
+      return {TokenType::LBRACKET, "["};
+    case ']':
+      return {TokenType::RBRACKET, "]"};
+    case ',':
+      return {TokenType::COMMA, ","};
+    case ';':
+      return {TokenType::SEMICOLON, ";"};
+    case ':':
+      return {TokenType::COLON, ":"};
+    case '=':
+      return {TokenType::ASSIGN, "="};
+    case '+':
+      return {TokenType::PLUS, "+"};
+    case '-':
+      return {TokenType::MINUS, "-"};
+    case '*':
+      return {TokenType::MUL, "*"};
+    case '/':
+      return {TokenType::DIV, "/"};
+    case '<':
+      return {TokenType::LT, "<"};
+    case '>':
+      return {TokenType::GT, ">"};
+    case '!':
+      return {TokenType::NOT, "!"};
+    default:
+      throw std::runtime_error("Unknown character: " + std::string(1, currChar));
+  }
+}
+
+Token LexicalAnalyzer::peek() {
+
+}
+

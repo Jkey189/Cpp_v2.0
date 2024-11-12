@@ -6,14 +6,34 @@
 
 
 enum class TokenType {
-  KEYWORD,
-  IDENTIFIER,
-  INTEGER_NUMBER,
-  FLOAT_NUMBER,
-  OPERATOR,
-  PUNCTUATOR,
-  // WHITESPACE,
-  UNKNOWN
+  INT, FLOAT, CHAR, BOOL, VOID, STRING, ARRAY,
+
+  NUMBER, IDENTIFIER, IF, ELSE, SWITCH, CASE, DEFAULT, FOR, WHILE, RETURN, BREAK, CONTINUE,
+
+  ASSIGN, // =
+  PLUS, // +
+  MINUS, // -
+  MUL, // *
+  DIV, // /
+  LT, // <
+  GT, // >
+  EQ, // ==
+  NEQ, // !=
+  AND, // &&
+  OR, // ||
+  NOT, // !
+
+  LPAREN, // (
+  RPAREN, // )
+  LBRACE, // {
+  RBRACE, // }
+  LBRACKET, // [
+  RBRACKET, // ]
+  COMMA, // ,
+  SEMICOLON, // ;
+  COLON, // :
+
+  END
 };
 
 class Token {
@@ -24,7 +44,7 @@ public:
   Token(TokenType t, std::string s) :
   type_(t), value_(std::move(s)), position_({0,0}) {}
 
-  [[nodiscard]] TokenType getLexeme() const;
+  [[nodiscard]] TokenType getType() const;
   [[nodiscard]] std::string getValue() const;
 
   [[nodiscard]] size_t getLine() const;

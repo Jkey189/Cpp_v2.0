@@ -15,6 +15,8 @@ public:
   }
 
   std::vector<Token> tokenize();
+  Token getLex();
+  Token peek();
 
 
 private:
@@ -153,6 +155,64 @@ private:
     position_ += op.size();
 
     return {TokenType::OPERATOR, op};
+  }
+
+
+  Token parseNumber() {
+    std::string number;
+
+    while (position_ < program_.size() && isDigit(program_[position_])) {
+      number.push_back(program_[position_++]);
+    }
+
+    return {TokenType::NUMBER, number};
+  }
+
+  Token parseIdentifier() {
+    std::string id;
+
+    while (position_ < program_.size() && (isAlpha(program_[position_]) || program_[position_] == '_')) {
+      id.push_back(program_[position_++]);
+    }
+
+    switch (id) {
+      case "int":
+        return {TokenType::INT, id};
+      case "float":
+        return {TokenType::FLOAT, id};
+      case "char":
+        return {TokenType::CHAR, id};
+      case "bool":
+        return {TokenType::BOOL, id};
+      case "void":
+        return {TokenType::VOID, id};
+      case "string":
+        return {TokenType::STRING, id};
+      case "array":
+        return {TokenType::ARRAY, id};
+      case "if":
+        return {TokenType::IF, id};
+      case "else":
+        return {TokenType::ELSE, id};
+      case "switch":
+        return {TokenType::SWITCH, id};
+      case "case":
+        return {TokenType::CASE, id};
+      case "default":
+        return {TokenType::DEFAULT, id};
+      case "for":
+        return {TokenType::FOR, id};
+      case "while":
+        return {TokenType::WHILE, id};
+      case "return":
+        return {TokenType::RETURN, id};
+      case "break":
+        return {TokenType::BREAK, id};
+      case "continue":
+        return {TokenType::CONTINUE, id};
+      default:
+        return {TokenType::IDENTIFIER, id};
+    }
   }
 };
 

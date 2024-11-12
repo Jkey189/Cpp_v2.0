@@ -22,7 +22,7 @@ std::string getTokenValue(const TokenType token) {
 void printTokens(const std::vector<Token>& tokens) {
   for (auto& currToken : tokens) {
     std::cout << "Token value: " << currToken.getValue() << std::endl;;
-    std::cout << "Token type: " << getTokenValue(currToken.getLexeme()) << std::endl;
+    std::cout << "Token type: " << getTokenValue(currToken.getType()) << std::endl;
     std::cout << "Token position: line: " << currToken.getLine() << std::endl;
     std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;
   }

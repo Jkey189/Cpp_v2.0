@@ -4,4 +4,17 @@ project(Language)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Language main.cpp)
+add_executable(Language
+        main.cpp
+
+        includes/libraries.h
+
+        lexical-analyzer/headers/trie.h
+        lexical-analyzer/headers/tokens.h
+        lexical-analyzer/headers/lexer.h
+
+        lexical-analyzer/sources/trie.cpp
+        lexical-analyzer/sources/tokens.cpp
+        lexical-analyzer/sources/lexer.cpp
+        lexical-analyzer/sources/main.cpp
+)

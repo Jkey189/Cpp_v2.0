@@ -12,6 +12,7 @@
 #include <map>
 #include <cstdint>
 #include <cstring>
+#include <unordered_set>
 
 
 #endif //LIBRARIES_H

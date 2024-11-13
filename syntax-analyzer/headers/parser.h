@@ -39,213 +39,58 @@ private:
 
 
   // <программа> -> <декларация>*
-  void parseProgram() {
-    while(currToken_.getType() != TokenType::END) {
-      parseDeclaration();
-    }
-  }
+  void parseProgram();
 
   // <декларация> -> <функция> | <переменная>
-  void parseDeclaration() {
-    if (isType(currToken_)) {
-      Token nextToken = lexer_.peek();
-
-      if (nextToken.getType() == TokenType::LPAREN) {
-        parseFunction();
-      } else {
-        parseVariable();
-      }
-    } else {
-      throw std::runtime_error("Expected declaration");
-    }
-  }
+  void parseDeclaration();
 
   // <функция> -> <тип> <идентификатор> ( [ <параметры> ] ) { <блок> }
-  void parseFunction() {
-    parseType();
-    expect(TokenType::IDENTIFIER);
-    expect(TokenType::LPAREN);
-
-    if (currToken_.getType() != TokenType::RPAREN) {
-      parseParameters();
-    }
-
-    expect(TokenType::RPAREN);
-    parseBlock();
-  }
+  void parseFunction();
 
   // <параметры> -> <параметр> ( , <параметр> )*
-  void parseParameters() {
-    parseParameter();
-
-    while (currToken_.getType() != TokenType::COMMA) {
-      advance();
-      parseParameter();
-    }
-  }
+  void parseParameters();
 
   // <параметр> -> <тип> <идентификатор>
-  void parseParameter() {
-    parseType();
-    expect(TokenType::IDENTIFIER);
-  }
+  void parseParameter();
 
   // <переменная> -> <тип> <идентификатор> [ '=' <выражение> ] ';'
-  void parseVariable() {
-    parseType();
-    expect(TokenType::IDENTIFIER);
-
-    if (currToken_.getType() == TokenType::ASSIGN) {
-      advance();
-      parseExpression();
-    }
-
-    expect(TokenType::SEMICOLON);
-  }
+  void parseVariable();
 
   // <блок> -> '{' <инструкция>* '}'
-  void parseBlock() {
-    expect(TokenType::LBRACE);
-
-    while (currToken_.getType() != TokenType::RBRACE) {
-      parseStatement();
-    }
-
-    expect(TokenType::RBRACE);
-  }
+  void parseBlock();
 
   // <инструкция> -> <оператор> | <условная_инструкция> | <цикл> | <выбор> | <функция>
-  void parseStatement() {
-    if (currToken_.getType() == TokenType::IF) {
-      parseIfStatement();
-    } else if (currToken_.getType() == TokenType::WHILE || currToken_.getType() == TokenType::FOR) {
-      parseLoop();
-    } else if (currToken_.getType() == TokenType::SWITCH) {
-      parseSwitch();
-    } else {
-      throw std::runtime_error("Unexpected statement");
-    }
-  }
+  void parseStatement();
 
   // <оператор> -> <идентификатор> '=' <выражение> ';' | return <выражение> ';' | ...
-  void parseOperator() {
-    if (currToken_.getType() == TokenType::IDENTIFIER) {
-      advance();
-      expect(TokenType::ASSIGN);
-      parseExpression();
-      expect(TokenType::SEMICOLON);
-    } else if (currToken_.getType() == TokenType::RETURN) {
-      advance();
-      parseExpression();
-      expect(TokenType::SEMICOLON);
-    } else {
-      throw std::runtime_error("Unexpected statement");
-    }
-  }
+  void parseOperator();
 
   // <условная_инструкция> -> if '(' <выражение> ')' <блок> [else <блок>]
-  void parseIfStatement() {
-    expect(TokenType::IF);
-    expect(TokenType::LPAREN);
-    parseExpression();
-    expect(TokenType::RPAREN);
-    parseBlock();
-
-    if (currToken_.getType() == TokenType::ELSE) {
-      advance();
-      parseBlock();
-    }
-  }
+  void parseIfStatement();
 
   // <цикл> -> while '(' <выражение> ')' <блок> | for '(' [<инициализация>] ';' ...
-  void parseLoop() {
-    if (currToken_.getType() == TokenType::WHILE) {
-      advance();
-      expect(TokenType::LPAREN);
-      parseExpression();
-      expect(TokenType::RPAREN);
-      parseBlock();
-    } else if (currToken_.getType() == TokenType::FOR) {
-      advance();
-      expect(TokenType::LPAREN);
-
-      if (isType(currToken_)) {
-        parseVariable();
-      }
-      expect(TokenType::SEMICOLON);
-
-      if (currToken_.getType() != TokenType::SEMICOLON) {
-        parseExpression();
-      }
-      expect(TokenType::SEMICOLON);
-
-      if (currToken_.getType() != TokenType::RPAREN) {
-        parseOperator();
-      }
-      expect(TokenType::RPAREN);
-      parseBlock();
-    } else {
-      throw std::runtime_error("Unexpected statement");
-    }
-  }
+  void parseLoop();
 
   // <выбор> -> switch '(' <выражение> ')' '{' ( case <литерал> : <блок> )* [default: <блок>] '}'
-  void parseSwitch() {
-    expect(TokenType::SWITCH);
-    expect(TokenType::LPAREN);
-    parseExpression();
-    expect(TokenType::RPAREN);
-    expect(TokenType::LBRACE);
-
-    while (currToken_.getType() == TokenType::CASE) {
-      advance();
-      parseLiteral();
-      expect(TokenType::COLON);
-      parseBlock();
-    }
-
-    if (currToken_.getType() == TokenType::DEFAULT) {
-      advance();
-      expect(TokenType::COLON);
-      parseBlock();
-    }
-
-    expect(TokenType::RBRACE);
-  }
+  void parseSwitch();
 
   // <выражение> -> <выражение_лог_или> и другие правила выражений
-  void parseExpression() {
-    parseLogicalOr();
-  }
+  void parseExpression();
 
-  void parseLogicalOr() {
-    parseLogicalAnd();
-
-    while (currToken_.getType() == TokenType::OR) {
-      advance();
-      parseLogicalAnd();
-    }
-  }
+  void parseLogicalOr();
 
   void parseLogicalAnd();
 
-  // ...
-  // Распишу позже
+  void parseEqNeq();
+
+  void parseLowGreat();
+
+  void parsePlusMinus();
+
+  void parseMulDiv();
 
   // <тип> -> int | float | double | char | bool | void | string | array<тип>
-  void parseType() {
-    if (isType(currToken_)) {
-      advance();
-
-      if (currToken_.getType() == TokenType::ARRAY) {
-        expect(TokenType::LT);
-        parseType();
-        expect(TokenType::GT);
-      }
-    } else {
-      throw std::runtime_error("Unexpected statement");
-    }
-  }
+  void parseType();
 
   void parseLiteral(); // lexical literals analyzing
 };

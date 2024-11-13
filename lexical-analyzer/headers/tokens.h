@@ -6,9 +6,14 @@
 
 
 enum class TokenType {
+  KEYWORD,
   INT, FLOAT, CHAR, BOOL, VOID, STRING, ARRAY,
 
   NUMBER, IDENTIFIER, IF, ELSE, SWITCH, CASE, DEFAULT, FOR, WHILE, RETURN, BREAK, CONTINUE,
+
+  INTEGER_LITERAL,
+  FLOAT_LITERAL,
+  STRING_LITERAL,
 
   ASSIGN, // =
   PLUS, // +
@@ -33,6 +38,7 @@ enum class TokenType {
   SEMICOLON, // ;
   COLON, // :
 
+  UNKNOWN,
   END
 };
 

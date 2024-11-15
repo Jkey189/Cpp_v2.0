@@ -2,7 +2,7 @@
 
 
 void Parser::parse() {
- advance();
+  advance();
   parseProgram();
 }
 

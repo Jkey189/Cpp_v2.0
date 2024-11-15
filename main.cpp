@@ -1,5 +1,6 @@
 #include "includes/libraries.h"
 #include "lexical-analyzer/headers/lexer.h"
+#include "syntax-analyzer/headers/parser.h"
 
 
 std::string getTokenValue(const TokenType token) {
@@ -101,8 +102,9 @@ void printTokens(const std::vector<Token>& tokens) {
   for (auto& currToken : tokens) {
     std::cout << "Token value: " << currToken.getValue() << std::endl;;
     std::cout << "Token type: " << getTokenValue(currToken.getType()) << std::endl;
-    std::cout << "Token position: line: " << currToken.getLine() << std::endl;
-    std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;
+    /*std::cout << "Token position: line: " << currToken.getLine() << std::endl;
+    std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;*/
+    std::cout << std::endl;
   }
 }
 
@@ -250,14 +252,27 @@ int main() {
 
   // lexer начал свою работу
   const std::vector<Token> tokens = lexer.tokenize();
-  std::cout << "Tokenization complete." << std::endl;
+  std::cout << "Tokenization completed." << std::endl;
 
-  std::cout << "Source code:\n" << sourceCode << std::endl << std::endl;
+  /*std::cout << "Source code:\n" << sourceCode << std::endl << std::endl;
 
   // Выводим получившиеся лексемы
   std::cout << "Tokens in this source code:" << std::endl << std::endl;
   printTokens(tokens);
-  std::cout << std::endl;
+  std::cout << std::endl;*/
+
+
+  // Сейчас воркает синтаксический анализатор
+  std::cout << std::endl << std::endl << std::endl << std::endl;
+  Parser parser(lexer);
+
+  try {
+    parser.parse();
+    std::cout << "Syntax analyzer has completed successfully!" << std::endl;
+  } catch (const std::exception& e) {
+    std::cerr << "Ошибка синтаксического анализатора: " << e.what() << std::endl;
+    return -4;
+  }
 
   return 0;
 }

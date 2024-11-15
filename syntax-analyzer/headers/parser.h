@@ -10,6 +10,10 @@
 
 class Parser {
 public:
+  explicit Parser(LexicalAnalyzer& lexer): lexer_(lexer), currToken_(lexer.getLex()) {
+    currToken_ = lexer_.getLex();
+  }
+
   void parse();
 
 
@@ -27,7 +31,12 @@ private:
 
 
   void advance() {
+    /*const Token prevToken = currToken_;*/
     currToken_ = lexer_.getLex();
+
+    /*if (currToken_.getType() == TokenType::END && prevToken.getType() != TokenType::END) {
+      throw std::runtime_error("Expression expected");
+    }*/
   }
 
   void expect(TokenType type) {

@@ -2,7 +2,8 @@
 
 
 std::vector<Token> LexicalAnalyzer::tokenize() {
-  /*std::cout << "Start tokenization now!!!" << std::endl << std::endl; // Для проверки*/
+  std::cout << "Start tokenization now!!!" << std::endl << std::endl; // Для проверки
+
   std::vector<Token> tokens;
   std::string op;
 
@@ -15,27 +16,34 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
     }
 
     if (isDigit(currChar)) {
+      std::cout << "We've found number!" << std::endl; // Для проверки
       std::string number = getNumber();
 
       if (number.find('.') != std::string::npos) {
+        std::cout << "It's an integer!" << std::endl << std::endl; // Для проверки
         tokens.emplace_back(TokenType::FLOAT_LITERAL, number);
       } else {
+        std::cout << "It's an float!" << std::endl; // Для проверки
         tokens.emplace_back(TokenType::INTEGER_LITERAL, number);
       }
     } else if (isOperator(op)) {
+      std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeOperator(op));
     } else if (isBracket(currChar)) {
+      std::cout << "We've found bracket!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeBracket(currChar));
       ++position_;
     } else if (isAlpha(currChar) || currChar == '_') {
       tokens.emplace_back(tokenizeIdentifierOrKeyword());
     }
     else {
+      std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
       tokens.emplace_back(TokenType::UNKNOWN, std::string(1, currChar));
       ++position_;
     }
   }
 
+  std::cout << "The END!" << std::endl << std::endl; // Для проверки
   tokens.emplace_back(TokenType::END, "");
 
   return tokens;

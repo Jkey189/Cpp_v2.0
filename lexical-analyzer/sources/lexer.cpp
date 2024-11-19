@@ -2,12 +2,81 @@
 
 
 std::vector<Token> LexicalAnalyzer::tokenize() {
-  std::cout << "Start tokenization now!!!" << std::endl << std::endl; // Для проверки
+  // std::cout << "Start tokenization now!!!" << std::endl << std::endl; // Для проверки
 
   std::vector<Token> tokens;
   std::string op;
 
   while (position_ < program_.size()) {
+    // типо жестко работаем))
+    {
+      // очищаем последнюю строчку в консоли (пока хз как)
+      std::cout << static_cast<char>(8);
+      std::cout << '\b';
+      ++COUNT;
+      COUNT %= 6;
+      if (COUNT == 0) {
+        std::cout << std::endl;
+        ++COUNT;
+      }
+
+      // size_t sleeping = rnd() % 1000 + 500;
+      size_t sleeping = 1500;
+      std::this_thread::sleep_for(std::chrono::milliseconds(sleeping));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      std::cout << "[ ";
+      if (COUNT == 1) {
+        if (rng() % 2 != 0) {
+          std::cout << static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248) <<
+            static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
+        } else {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248) <<
+            static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
+        }
+      }
+      if (COUNT == 2) {
+        if (rng() % 2 != 0) {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
+        } else {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
+        }
+      }
+      if (COUNT == 3) {
+        if (rng() % 2 != 0) {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
+        } else {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248);
+        }
+      }
+      if (COUNT == 4) {
+        if (rng() % 2 != 0) {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248);
+        } else {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248);
+        }
+      }
+      if (COUNT == 5) {
+        if (rng() % 2 != 0) {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219);
+        } else {
+          std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
+            static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219);
+        }
+      }
+      std::cout << " ]";
+      /*for (int i = 0; i < COUNT; ++i) {
+        std::cout << static_cast<char>(248);
+      }*/
+      std::cout << std::endl;
+    }
+
     const char currChar = program_[position_];
 
     if (isSpace(currChar) || isEnter(currChar)) {
@@ -15,35 +84,62 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       continue;
     }
 
-    if (isDigit(currChar)) {
-      std::cout << "We've found number!" << std::endl; // Для проверки
+    if (isIdentifierChar(currChar)) {
+      std::string word = getWord();
+
+      if (word == "int") {
+        tokens.emplace_back(TokenType::INT, word);
+      } else if (word == "float") {
+        tokens.emplace_back(TokenType::FLOAT, word);
+      } else if (word == "string") {
+        tokens.emplace_back(TokenType::STRING, word);
+      } else if (word == "char") {
+        tokens.emplace_back(TokenType::CHAR, word);
+      } else if (word == "bool") {
+        tokens.emplace_back(TokenType::BOOL, word);
+      } else if (word == "void") {
+        tokens.emplace_back(TokenType::VOID, word);
+      } else if (word == "string") {
+        tokens.emplace_back(TokenType::STRING, word);
+      }  else if (word == "array") {
+        tokens.emplace_back(TokenType::ARRAY, word);
+      } else if (keywords_.find(word)) {
+        tokens.emplace_back(TokenType::KEYWORD, word);
+      } else {
+        tokens.emplace_back(TokenType::IDENTIFIER, word);
+      }
+    } else if (isDigit(currChar)) {
+      // std::cout << "We've found number!" << std::endl; // Для проверки
       std::string number = getNumber();
 
       if (number.find('.') != std::string::npos) {
-        std::cout << "It's an integer!" << std::endl << std::endl; // Для проверки
+        // std::cout << "It's an integer!" << std::endl << std::endl; // Для проверки
         tokens.emplace_back(TokenType::FLOAT_LITERAL, number);
       } else {
-        std::cout << "It's an float!" << std::endl; // Для проверки
+        // std::cout << "It's an float!" << std::endl; // Для проверки
         tokens.emplace_back(TokenType::INTEGER_LITERAL, number);
       }
     } else if (isOperator(op)) {
-      std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
+      // std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeOperator(op));
     } else if (isBracket(currChar)) {
-      std::cout << "We've found bracket!" << std::endl << std::endl; // Для проверки
+      // std::cout << "We've found bracket!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeBracket(currChar));
       ++position_;
     } else if (isAlpha(currChar) || currChar == '_') {
       tokens.emplace_back(tokenizeIdentifierOrKeyword());
-    }
-    else {
-      std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
+    } /*else if (isPunctuatorOrSpecialSymbol(currChar)) {
+      if (currChar == '(') {
+        tokens.emplace_back(TokenType::LPAREN, std::string(1, currChar));
+      }
+    }*/ else {
+      // std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
       tokens.emplace_back(TokenType::UNKNOWN, std::string(1, currChar));
       ++position_;
     }
   }
 
-  std::cout << "The END!" << std::endl << std::endl; // Для проверки
+  // std::cout << "The END!" << std::endl << std::endl; // Для проверки
   tokens.emplace_back(TokenType::END, "");
 
   return tokens;
@@ -135,6 +231,16 @@ bool LexicalAnalyzer::isIdentifierChar(const char c) {
   return isAlpha(c) || isDigit(c) || c == '_';
 }
 
+bool LexicalAnalyzer::isPunctuatorOrSpecialSymbol(const char c) {
+  if (c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' ||
+    c == ',' || c == ';' || c == ':' || c == '=' || c == '=' || c == '+' || c == '-' || c == '*' ||
+    c == '/' || c == '<' || c == '>' || c == '!') {
+    return true;
+  }
+  return false;
+}
+
+
 std::string LexicalAnalyzer::getWord() {
   const size_t start = position_;
   while (position_ < program_.length() && isIdentifierChar(program_[position_])) {
@@ -212,26 +318,14 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
   return operators.contains(op);
 }
 
-Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() const {
-  /*const size_t start = position_;
-
-    while (position_ < program_.length() && (std::isalnum(program_[position_]) ||
-      program_[position_] == '_')) {
-      ++position_;
-    }
-
-    std::string word = program_.substr(start, position_ - start);
-    TokenType wordType = keywords_.find(word) ? TokenType::KEYWORD : TokenType::IDENTIFIER;
-
-    std::cout << "Yee. We've found an identifier!!! " << "It's a/an " << word << std::endl;
-
-    return {wordType, word};*/
-
-  std::string identifier;
+Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() {
+  const size_t start = position_;
 
   while (position_ < program_.size() && isIdentifierChar(program_[position_])) {
-    identifier.push_back(program_[position_]);
+    ++position_;
   }
+
+  std::string identifier = program_.substr(start, position_);
 
   if (isKeyword(identifier)) {
     return {TokenType::KEYWORD, identifier};
@@ -439,6 +533,3 @@ Token LexicalAnalyzer::parseIdentifier() {
   }
   return {TokenType::IDENTIFIER, id};
 }
-
-
-

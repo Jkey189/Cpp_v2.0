@@ -13,6 +13,15 @@
 #include <cstdint>
 #include <cstring>
 #include <unordered_set>
+#include <chrono>
+#include <thread>
+#include <cstdlib>
+#include <random>
+
+
+// const variables
+inline int COUNT = 0;
+static inline std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
 
 
 #endif //LIBRARIES_H

@@ -30,6 +30,7 @@ private:
   static bool isAlpha(char c);
   static bool isDigit(char c);
   static bool isIdentifierChar(char c);
+  static bool isPunctuatorOrSpecialSymbol(char c);
 
   // Конвертим к слову
   std::string getWord();
@@ -42,7 +43,7 @@ private:
 
   bool isOperator(std::string& op) const;
 
-  [[nodiscard]] Token tokenizeIdentifierOrKeyword() const;
+  [[nodiscard]] Token tokenizeIdentifierOrKeyword();
 
   bool isKeyword(std::string& id) const;
 

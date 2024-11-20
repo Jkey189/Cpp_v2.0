@@ -105,7 +105,7 @@ void printTokens(const std::vector<Token>& tokens) {
     /*std::cout << "Token position: line: " << currToken.getLine() << std::endl;
     std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;*/
     std::cout << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    /*std::this_thread::sleep_for(std::chrono::milliseconds(500));*/
   }
 }
 
@@ -256,7 +256,7 @@ int main() {
 
   // std::cout << "Source code:\n" << sourceCode << std::endl << std::endl;
 
-  bool first = true;
+  /*bool first = true;
   while (COUNT < 6) {
     ++COUNT;
     if (COUNT == 5 && first) {
@@ -320,10 +320,10 @@ int main() {
     std::cout << std::endl;
     ++COUNT;
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  }
+  }*/
   std::cout << "Tokenization completed." << std::endl << std::endl << std::endl;
   std::cout << "Tokens in this source code:" << std::endl << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  /*std::this_thread::sleep_for(std::chrono::milliseconds(500));*/
   printTokens(tokens);
   std::cout << std::endl;
 

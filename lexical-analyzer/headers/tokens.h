@@ -17,6 +17,8 @@ enum class TokenType {
   BOOL_LITERAL,
   CHAR_LITERAL,
 
+  IN, // >>
+  OUT, // <<
   ASSIGN, // =
   PLUS, // +
   MINUS, // -
@@ -29,6 +31,7 @@ enum class TokenType {
   AND, // &&
   OR, // ||
   NOT, // !
+  QUOTEMARK, // "
 
   LPAREN, // (
   RPAREN, // )

@@ -9,7 +9,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
 
   while (position_ < program_.size()) {
     // типо жестко работаем))
-    {
+    /*{
       // очищаем последнюю строчку в консоли (пока хз как)
       std::cout << static_cast<char>(8);
       std::cout << '\b';
@@ -73,9 +73,9 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       std::cout << " ]";
       /*for (int i = 0; i < COUNT; ++i) {
         std::cout << static_cast<char>(248);
-      }*/
+      }#1#
       std::cout << std::endl;
-    }
+    }*/
 
     const char currChar = program_[position_];
 
@@ -84,15 +84,24 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       continue;
     }
 
-    if (isIdentifierChar(currChar)) {
+    if (isDigit(currChar)) {
+      // std::cout << "We've found number!" << std::endl; // Для проверки
+      std::string number = getNumber();
+
+      if (number.find('.') != std::string::npos) {
+        // std::cout << "It's an integer!" << std::endl << std::endl; // Для проверки
+        tokens.emplace_back(TokenType::FLOAT_LITERAL, number);
+      } else {
+        // std::cout << "It's an float!" << std::endl; // Для проверки
+        tokens.emplace_back(TokenType::INTEGER_LITERAL, number);
+      }
+    } else if (isIdentifierChar(currChar)) {
       std::string word = getWord();
 
       if (word == "int") {
         tokens.emplace_back(TokenType::INT, word);
       } else if (word == "float") {
         tokens.emplace_back(TokenType::FLOAT, word);
-      } else if (word == "string") {
-        tokens.emplace_back(TokenType::STRING, word);
       } else if (word == "char") {
         tokens.emplace_back(TokenType::CHAR, word);
       } else if (word == "bool") {
@@ -108,17 +117,6 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       } else {
         tokens.emplace_back(TokenType::IDENTIFIER, word);
       }
-    } else if (isDigit(currChar)) {
-      // std::cout << "We've found number!" << std::endl; // Для проверки
-      std::string number = getNumber();
-
-      if (number.find('.') != std::string::npos) {
-        // std::cout << "It's an integer!" << std::endl << std::endl; // Для проверки
-        tokens.emplace_back(TokenType::FLOAT_LITERAL, number);
-      } else {
-        // std::cout << "It's an float!" << std::endl; // Для проверки
-        tokens.emplace_back(TokenType::INTEGER_LITERAL, number);
-      }
     } else if (isOperator(op)) {
       // std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeOperator(op));
@@ -128,11 +126,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       ++position_;
     } else if (isAlpha(currChar) || currChar == '_') {
       tokens.emplace_back(tokenizeIdentifierOrKeyword());
-    } /*else if (isPunctuatorOrSpecialSymbol(currChar)) {
-      if (currChar == '(') {
-        tokens.emplace_back(TokenType::LPAREN, std::string(1, currChar));
-      }
-    }*/ else {
+    } else {
       // std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
       tokens.emplace_back(TokenType::UNKNOWN, std::string(1, currChar));
       ++position_;
@@ -199,6 +193,8 @@ Token LexicalAnalyzer::getLex() {
       return {TokenType::GT, ">"};
     case '!':
       return {TokenType::NOT, "!"};
+    case '\"':
+      return {TokenType::QUOTEMARK, "\""};
     default:
       throw std::runtime_error("Unknown character: " + std::string(1, currChar));
   }
@@ -212,7 +208,7 @@ Token LexicalAnalyzer::peek() {
 }
 
 bool LexicalAnalyzer::isSpace(const char c) {
-  return c == ' ' || c == '\t' || c == '\v' || c == '\f';
+  return c == ' '/* || c == '\t' || c == '\v' || c == '\f'*/;
 }
 
 bool LexicalAnalyzer::isEnter(const char c) {
@@ -256,7 +252,9 @@ std::string LexicalAnalyzer::getNumber() {
 
   while (position_ < program_.length() && isDigit(program_[position_]) || program_[position_] == '.') {
     if (program_[position_] == '.') {
-      if (hasDecimal) { break; }
+      if (hasDecimal) {
+        break;
+      }
       hasDecimal = true;
     }
     ++position_;
@@ -295,24 +293,24 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
 
   // Надеемся, что это работает
   const char ch = program_[position_];
-    op = std::string(1, ch);
+  op = std::string(1, ch);
 
-    if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
-      return false;
+  if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
+    return false;
+  }
+
+  if ((ch == '=' || ch == '<' || ch == '>') && position_ + 1 < program_.size()) {
+    const char nextCh = program_[position_ + 1];
+
+    if ((ch == '=' && nextCh == '=') ||
+      (ch == '<' && nextCh == '=') ||
+      (ch == '>' && nextCh == '=')) {
+      op += nextCh;
     }
-
-    if ((ch == '=' || ch == '<' || ch == '>') && position_ + 1 < program_.size()) {
-      const char nextCh = program_[position_];
-
-      if ((ch == '=' && nextCh == '=') ||
-        (ch == '<' && nextCh == '=') ||
-        (ch == '>' && nextCh == '=')) {
-        op += nextCh;
-      }
-    }
+  }
 
   static const std::unordered_set<std::string> operators = {
-    "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "="
+    ">>", "<<", "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "="
   };
 
   return operators.contains(op);
@@ -411,6 +409,12 @@ TokenType LexicalAnalyzer::keywordToTokenType(const std::string& keyword) {
 Token LexicalAnalyzer::tokenizeOperator(std::string& op) {
   position_ += op.size();
 
+  if (op == ">>") {
+    return {TokenType::IN, op};
+  }
+  if (op == "<<") {
+    return {TokenType::OUT, op};
+  }
   if (op == "=") {
     return {TokenType::ASSIGN, op};
   }
@@ -446,6 +450,9 @@ Token LexicalAnalyzer::tokenizeOperator(std::string& op) {
   }
   if (op == "!") {
     return {TokenType::NOT, op};
+  }
+  if (op == "\"") {
+    return {TokenType::QUOTEMARK, op};
   }
   return {TokenType::UNKNOWN, op};
 }

@@ -112,7 +112,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
         tokens.emplace_back(TokenType::STRING, word);
       }  else if (word == "array") {
         tokens.emplace_back(TokenType::ARRAY, word);
-      } else if (keywords_.find(word)) {
+      } else if (isKeyword(word)) {
         tokens.emplace_back(TokenType::KEYWORD, word);
       } else {
         tokens.emplace_back(TokenType::IDENTIFIER, word);
@@ -331,8 +331,12 @@ Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() {
   return {TokenType::IDENTIFIER, identifier};
 }
 
-bool LexicalAnalyzer::isKeyword(std::string& id) const {
-  return keywords_.find(id) != std::string::npos;
+bool LexicalAnalyzer::isKeyword(const std::string& id) {
+  if (id == "if" || id == "else" || id == "switch" || id == "case" || id == "break" || id == "continue" ||
+    id == "for" || id == "while" || id == "true" || id == "false" || id == "const") {
+    return true;
+  }
+  return false;
 }
 
 TokenType LexicalAnalyzer::keywordToTokenType(const std::string& keyword) {

@@ -45,7 +45,7 @@ private:
 
   [[nodiscard]] Token tokenizeIdentifierOrKeyword();
 
-  bool isKeyword(std::string& id) const;
+  static bool isKeyword(const std::string& id);
 
   [[nodiscard]] static TokenType keywordToTokenType(const std::string& keyword);
 

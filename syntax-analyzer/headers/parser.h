@@ -11,10 +11,13 @@
 class Parser {
 public:
   explicit Parser(LexicalAnalyzer& lexer): lexer_(lexer), currToken_(lexer.getLex()) {
-    currToken_ = lexer_.getLex();
+    /*currToken_ = lexer_.getLex();*/
+    advance();
   }
 
-  void parse();
+  void parse() {
+    program();
+  }
 
 
 private:
@@ -22,7 +25,17 @@ private:
   Token currToken_;
 
 
-  bool isType(const Token& token) {
+  static bool isNumber(const std::string& num) {
+    for (const auto ch : num) {
+      if (ch != '.' && (ch < '0' || ch > '9')) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+  static bool isType(const Token& token) {
     return token.getType() == TokenType::INT || token.getType() == TokenType::FLOAT ||
       token.getType() == TokenType::CHAR || token.getType() == TokenType::BOOL ||
         token.getType() == TokenType::VOID ||token.getType() == TokenType::STRING ||
@@ -47,61 +60,259 @@ private:
   }
 
 
-  // <программа> -> <декларация>*
-  void parseProgram();
+  // запускаем parser
+  void program() {
+    advance();
+    parseProgram();
+  }
 
-  // <декларация> -> <функция> | <переменная>
-  void parseDeclaration();
+  // программа
+  void parseProgram() {
+    while (currToken_.getType() != TokenType::END) {
+      parseDeclaration();
+    }
+  }
 
-  // <функция> -> <тип> <идентификатор> ( [ <параметры> ] ) { <блок> }
-  void parseFunction();
+  // декларация
+  void parseDeclaration() {
+    if (currToken_.getValue() == "func") {
+      Token nextToken = lexer_.peek();
+      if (isType(nextToken)) {
+        parseFunction();
+      } else {
+        throw std::runtime_error("Syntax error: unexpected token");
+      }
+    } else if (isType(currToken_)) {
+      parseDeclaration();
+    } else {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+  }
 
-  // <параметры> -> <параметр> ( , <параметр> )*
-  void parseParameters();
+  // функция
+  void parseFunction() {
+    parseType();
+    parseIdentifier();
+    expect(TokenType::LPAREN);
+    parseParams();
+    expect(TokenType::RPAREN);
+    parseBlock();
+  }
 
-  // <параметр> -> <тип> <идентификатор>
-  void parseParameter();
+  // параметры
+  void parseParams() {
+    parseParam();
+    while (currToken_.getValue() == ",") {
+      advance();
+      parseParam();
+    }
+  }
 
-  // <переменная> -> <тип> <идентификатор> [ '=' <выражение> ] ';'
-  void parseVariable();
+  // параметр
+  void parseParam() {
+    parseType();
+    expect(TokenType::IDENTIFIER);
+  }
 
-  // <блок> -> '{' <инструкция>* '}'
-  void parseBlock();
+  // переменная
+  void parseVariable() {
+    expect(TokenType::IDENTIFIER);
+  }
 
-  // <инструкция> -> <оператор> | <условная_инструкция> | <цикл> | <выбор> | <функция>
-  void parseStatement();
+  // блок
+  void parseBlock() {
+    expect(TokenType::LBRACE);
+    while (currToken_.getType() != TokenType::RBRACE) {
+      parseStatement();
+    }
+    expect(TokenType::RBRACE);
+  }
 
-  // <оператор> -> <идентификатор> '=' <выражение> ';' | return <выражение> ';' | ...
-  void parseOperator();
+  // состояние
+  void parseStatement() {
+    // add operator
+    if (currToken_.getType() == TokenType::IF) {
+      parseIf();
+    } else if (currToken_.getType() == TokenType::FOR || currToken_.getType() == TokenType::WHILE) {
+      parseLoop();
+    } else if (currToken_.getType() == TokenType::SWITCH) {
+      parseSwitch();
+    } else if (currToken_.getValue() == "func") {
+      parseFunction();
+    } else {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+  }
 
-  // <условная_инструкция> -> if '(' <выражение> ')' <блок> [else <блок>]
-  void parseIfStatement();
+  // оператор
+  void parseOperator() {
+    if (currToken_.getType() == TokenType::IDENTIFIER) {
+      parseIdentifier();
+      advance();
 
-  // <цикл> -> while '(' <выражение> ')' <блок> | for '(' [<инициализация>] ';' ...
-  void parseLoop();
+      if (currToken_.getType() == TokenType::ASSIGN) {
+        advance();
+        parseExpression();
+        expect(TokenType::SEMICOLON);
+      } else if (currToken_.getType() == TokenType::SEMICOLON) {
+        advance();
+      } else {
+        throw std::runtime_error("Syntax error: unexpected token");
+      }
+    } else if (currToken_.getType() == TokenType::RETURN) {
+      advance();
+      parseExpression();
+      expect(TokenType::SEMICOLON);
+    } else if (currToken_.getType() == TokenType::BREAK) {
+      advance();
+      expect(TokenType::SEMICOLON);
+    } else if (currToken_.getType() == TokenType::CONTINUE) {
+      advance();
+      expect(TokenType::CONTINUE);
+    } else if (currToken_.getType() == TokenType::IF ||
+      currToken_.getType() == TokenType::FOR || currToken_.getType() == TokenType::WHILE ||
+      currToken_.getType() == TokenType::SWITCH ||
+      currToken_.getValue() == "func") {
+      parseStatement();
+      expect(TokenType::SEMICOLON);
+      } else if (currToken_.getType() == TokenType::SEMICOLON) {
+        advance();
+      } else {
+        throw std::runtime_error("Syntax error: unexpected token");
+      }
+  }
 
-  // <выбор> -> switch '(' <выражение> ')' '{' ( case <литерал> : <блок> )* [default: <блок>] '}'
-  void parseSwitch();
+  // условный оператор if
+  void parseIf() {
+    expect(TokenType::IF);
+    expect(TokenType::LPAREN);
+    parseExpression();
+    expect(TokenType::RPAREN);
+    parseBlock();
 
-  // <выражение> -> <выражение_лог_или> и другие правила выражений
-  void parseExpression();
+    if (currToken_.getType() == TokenType::ELSE) {
+      if (lexer_.peek().getType() == TokenType::IF) {
+        parseIf();
+      } else if (lexer_.peek().getType() == TokenType::LBRACE) {
+        advance();
+        parseBlock();
+      } else {
+        throw std::runtime_error("Syntax error: unexpected token");
+      }
+    }
+  }
 
-  void parseLogicalOr();
+  // цикл
+  void parseLoop() {
+    if (currToken_.getType() == TokenType::FOR) {
+      advance();
+      expect(TokenType::LBRACE);
+      parseInitialization();
+      expect(TokenType::SEMICOLON);
+      parseExpression();
+      expect(TokenType::SEMICOLON);
+      parseStep();
+      expect(TokenType::RBRACE);
+    } else if (currToken_.getType() == TokenType::WHILE) {
+      advance();
+      expect(TokenType::LBRACE);
+      parseExpression();
+      expect(TokenType::RBRACE);
+      parseBlock();
+    } else {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+  }
 
+  // инициализация
+  void parseInitialization() {
+    if (isType(currToken_)) {
+      parseType();
+    }
+    if (currToken_.getType() == TokenType::IDENTIFIER) {
+      advance();
+      if (currToken_.getType() == TokenType::ASSIGN) {
+        advance();
+        if (currToken_.getType() == TokenType::IDENTIFIER) {
+          advance();
+        } else if (isNumber(currToken_.getValue())) {
+          advance();
+        } else {
+          throw std::runtime_error("Syntax error: unexpected token");
+        }
+        expect(TokenType::SEMICOLON);
+      } else {
+        throw std::runtime_error("Syntax error: unexpected token");
+      }
+    } else {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+  }
+
+  // шаг
+  void parseStep() {
+    parseOperator();
+  }
+
+  // выбор switch
+  void parseSwitch() {
+    expect(TokenType::SWITCH);
+    expect(TokenType::LPAREN);
+    parseExpression();
+    expect(TokenType::RPAREN);
+    expect(TokenType::LBRACE);
+    while (currToken_.getType() == TokenType::CASE) {
+      parseLiteral();
+      expect(TokenType::COLON);
+      parseBlock();
+    }
+    if (currToken_.getType() == TokenType::DEFAULT) {
+      expect(TokenType::COLON);
+      parseBlock();
+    }
+    expect(TokenType::RBRACE);
+  }
+
+  // литерал
+  void parseLiteral();
+
+  // выражение
+  void parseExpression() {
+    if (isNumber(currToken_.getValue())) {
+      parseLiteral();
+    }
+    parseLogicalOr();
+  }
+
+  // логическое ИЛИ
+  void parseLogicalOr() {
+    parseLogicalAnd();
+    if (currToken_.getType() == TokenType::AND) {
+      advance();
+      parseLogicalAnd();
+    }
+  }
+
+  // логическое И
   void parseLogicalAnd();
 
-  void parseEqNeq();
+  void parseIdentifier();
 
-  void parseLowGreat();
+  void parseType() {
+    advance();
 
-  void parsePlusMinus();
-
-  void parseMulDiv();
-
-  // <тип> -> int | float | double | char | bool | void | string | array<тип>
-  void parseType();
-
-  void parseLiteral(); // lexical literals analyzing
+    if (isType(currToken_)) {
+      advance();
+      if (currToken_.getValue() == "array") {
+        expect(TokenType::LT);
+        // advance();
+        parseType();
+        expect(TokenType::GT);
+      }
+    } else {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+  }
 };
 
 

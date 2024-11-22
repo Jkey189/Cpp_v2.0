@@ -1,17 +1,6 @@
-+
--
-*
-/
-=
-!
-==
-!=
-<
->
-<<
->>
-,
-;
-:
-&&
-||
+func int main() {
+    int a = 5;
+    flat _float = 4.5;
+    string str = "abc";
+    cout << a << " " << _float << " " str;
+}

@@ -112,7 +112,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
         tokens.emplace_back(TokenType::STRING, word);
       }  else if (word == "array") {
         tokens.emplace_back(TokenType::ARRAY, word);
-      } else if (isKeyword(word)) {
+      } else if (keywords_.find(word) /*isKeyword(word)*/) {
         tokens.emplace_back(TokenType::KEYWORD, word);
       } else {
         tokens.emplace_back(TokenType::IDENTIFIER, word);
@@ -128,7 +128,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       tokens.emplace_back(tokenizeIdentifierOrKeyword());
     } else if (currChar == '\"') {
       std::string str = getString();
-      tokens.emplace_back(TokenType::STRING_LITERAL, str);
+      tokens.emplace_back(TokenType::STRING_LITERAL, "\"" + str + "\"");
     } else {
       // std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
       tokens.emplace_back(TokenType::UNKNOWN, std::string(1, currChar));
@@ -265,13 +265,15 @@ std::string LexicalAnalyzer::getString() {
     ++position_;
   }
 
-  std::string str;
-  str = program_.substr(start, position_);
-  /*if (position_ < program_.size() && program_[position_] != '\"') {
-    str = program_.substr(start, position_);
+  /*std::string str;
+  if (position_ < program_.size() && program_[position_] != '\"') {
+    str = program_.substr(start, position_ - start);
   } else {
     throw std::runtime_error("Lexer error: unexpected lexeme | must be `\"'");
   }*/
+
+  std::string str = program_.substr(start, position_ - start);
+  ++position_;
 
   return str;
 }
@@ -383,7 +385,7 @@ Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() {
 }
 
 bool LexicalAnalyzer::isKeyword(const std::string& id) {
-  if (id == "if" || id == "else" || id == "switch" || id == "case" || id == "break" || id == "continue" ||
+  if (id == "cin" || id == "cout" || id == "if" || id == "else" || id == "switch" || id == "case" || id == "break" || id == "continue" ||
     id == "for" || id == "while" || id == "true" || id == "false" || id == "const") {
     return true;
   }

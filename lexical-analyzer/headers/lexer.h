@@ -30,13 +30,15 @@ private:
   static bool isAlpha(char c);
   static bool isDigit(char c);
   static bool isIdentifierChar(char c);
-  static bool isPunctuatorOrSpecialSymbol(char c);
 
   // Конвертим к слову
   std::string getWord();
 
   // А здесь получаем число
   std::string getNumber();
+
+  // Распознаем строковый летрал
+  std::string getString();
 
   // Проверки для токенизации и сама токенизация
   void initializeKeywords(const std::string& keywordsPath) const;

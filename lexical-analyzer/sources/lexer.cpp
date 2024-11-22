@@ -126,6 +126,9 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       ++position_;
     } else if (isAlpha(currChar) || currChar == '_') {
       tokens.emplace_back(tokenizeIdentifierOrKeyword());
+    } else if (currChar == '\"') {
+      std::string str = getString();
+      tokens.emplace_back(TokenType::STRING_LITERAL, str);
     } else {
       // std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
       tokens.emplace_back(TokenType::UNKNOWN, std::string(1, currChar));
@@ -227,19 +230,10 @@ bool LexicalAnalyzer::isIdentifierChar(const char c) {
   return isAlpha(c) || isDigit(c) || c == '_';
 }
 
-bool LexicalAnalyzer::isPunctuatorOrSpecialSymbol(const char c) {
-  if (c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' ||
-    c == ',' || c == ';' || c == ':' || c == '=' || c == '=' || c == '+' || c == '-' || c == '*' ||
-    c == '/' || c == '<' || c == '>' || c == '!') {
-    return true;
-  }
-  return false;
-}
-
 
 std::string LexicalAnalyzer::getWord() {
   const size_t start = position_;
-  while (position_ < program_.length() && isIdentifierChar(program_[position_])) {
+  while (position_ < program_.size() && isIdentifierChar(program_[position_])) {
     ++position_;
   }
 
@@ -250,7 +244,7 @@ std::string LexicalAnalyzer::getNumber() {
   const size_t start = position_;
   bool hasDecimal = false;
 
-  while (position_ < program_.length() && isDigit(program_[position_]) || program_[position_] == '.') {
+  while (position_ < program_.size() && isDigit(program_[position_]) || program_[position_] == '.') {
     if (program_[position_] == '.') {
       if (hasDecimal) {
         break;
@@ -262,6 +256,26 @@ std::string LexicalAnalyzer::getNumber() {
 
   return program_.substr(start, position_ - start);
 }
+
+std::string LexicalAnalyzer::getString() {
+  ++position_;
+  const size_t start = position_;
+
+  while (position_ < program_.size() && program_[position_] != '\"') {
+    ++position_;
+  }
+
+  std::string str;
+  str = program_.substr(start, position_);
+  /*if (position_ < program_.size() && program_[position_] != '\"') {
+    str = program_.substr(start, position_);
+  } else {
+    throw std::runtime_error("Lexer error: unexpected lexeme | must be `\"'");
+  }*/
+
+  return str;
+}
+
 
 void LexicalAnalyzer::initializeKeywords(const std::string& keywordsPath) const {
   std::ifstream keywordsFile(keywordsPath);
@@ -295,22 +309,59 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
   const char ch = program_[position_];
   op = std::string(1, ch);
 
-  if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
-    return false;
+  if (ch == ',' || ch == ':' || ch == ';') {
+    return true;
   }
 
-  if ((ch == '=' || ch == '<' || ch == '>') && position_ + 1 < program_.size()) {
-    const char nextCh = program_[position_ + 1];
+  if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
+    return true;
+  }
 
-    if ((ch == '=' && nextCh == '=') ||
-      (ch == '<' && nextCh == '=') ||
-      (ch == '>' && nextCh == '=')) {
-      op += nextCh;
+  if (ch == '=' && position_ + 1 < program_.size()) {
+    const char nextChar = program_[position_ + 1];
+
+    if (nextChar == '=') {
+      op += nextChar;
+    }
+  }
+
+  if (ch == '!' && position_ + 1 < program_.size()) {
+    const char nextChar = program_[position_ + 1];
+
+    if (nextChar == '=') {
+      op += nextChar;
+    }
+  }
+
+  if ((ch == '<' || ch == '>') && position_ + 1 < program_.size()) {
+    const char nextChar = program_[position_ + 1];
+
+    if (ch == nextChar) {
+      op += nextChar;
+    }
+
+    if (ch != nextChar && !isSpace(nextChar) && !isEnter(nextChar)) {
+      throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use `" + op + "'");
+    }
+  }
+
+  if ((ch == '&' || ch == '|') && position_ + 1 < program_.size()) {
+    const char nextChar = program_[position_ + 1];
+
+    if (ch == nextChar) {
+      op += nextChar;
+    } else {
+      op += nextChar;
+      throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use `" + op + "'");
     }
   }
 
   static const std::unordered_set<std::string> operators = {
-    ">>", "<<", "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "="
+    "!", "=",
+    "==", "!=",
+    "<", ">",
+    "&&", "||",
+    ">>", "<<"
   };
 
   return operators.contains(op);
@@ -457,6 +508,15 @@ Token LexicalAnalyzer::tokenizeOperator(std::string& op) {
   }
   if (op == "\"") {
     return {TokenType::QUOTEMARK, op};
+  }
+  if (op == ",") {
+    return {TokenType::COMMA, op};
+  }
+  if (op == ":") {
+    return {TokenType::COLON, op};
+  }
+  if (op == ";") {
+    return {TokenType::SEMICOLON, op};
   }
   return {TokenType::UNKNOWN, op};
 }

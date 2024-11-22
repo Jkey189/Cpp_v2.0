@@ -1,9 +1,17 @@
-int n;
-cin >> n;
-int a = 5;
-float b = 4.6;
-string c = "abc";
-char d = 'x';
-void f() {
-    cout << a << b << c;
-}
++
+-
+*
+/
+=
+!
+==
+!=
+<
+>
+<<
+>>
+,
+;
+:
+&&
+||

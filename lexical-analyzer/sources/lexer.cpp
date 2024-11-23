@@ -556,7 +556,8 @@ Token LexicalAnalyzer::parseIdentifier() {
   while (position_ < program_.size() && (isAlpha(program_[position_]) || program_[position_] == '_')) {
     id.push_back(program_[position_++]);
   }
-  if (id =="int") {
+
+  /*if (id =="int") {
     return {TokenType::INT, id};
   }
   if (id =="float") {
@@ -603,6 +604,6 @@ Token LexicalAnalyzer::parseIdentifier() {
   }
   if (id =="continue") {
     return {TokenType::CONTINUE, id};
-  }
+  }*/
   return {TokenType::IDENTIFIER, id};
 }

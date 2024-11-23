@@ -8,7 +8,7 @@ void Parser::parseProgram() {
 
 void Parser::parseDeclaration() {
   if (currToken_.getValue() == "func") {
-    advance();
+    parserAdvance();
     if (isType(currToken_)) {
       parseFunction();
     } else {
@@ -25,7 +25,7 @@ void Parser::parseDeclaration() {
 
 void Parser::parseFunction() {
   if (currToken_.getValue() == "func") {
-    advance();
+    parserAdvance();
     parseType();
     parseIdentifier();
     expect(TokenType::LPAREN);
@@ -40,7 +40,7 @@ void Parser::parseFunction() {
 void Parser::parseParams() {
   parseParam();
   while (currToken_.getValue() == ",") {
-    advance();
+    parserAdvance();
     parseParam();
   }
 }
@@ -69,18 +69,21 @@ void Parser::parseBlock() {
 void Parser::parseIf() {
   expect(TokenType::IF);
   expect(TokenType::LPAREN);
+  if (currToken_.getType() == TokenType::RPAREN) {
+    throw std::runtime_error("Syntax error: unexpected token | `parseIf()' error");
+  }
   parseExpression();
   expect(TokenType::RPAREN);
   parseBlock();
 
   if (currToken_.getType() == TokenType::ELSE) {
-    advance();
+    parserAdvance();
     parseBlock();
 
     /*if (lexer_.peek().getType() == TokenType::IF) {
         parseIf();
       } else if (lexer_.peek().getType() == TokenType::LBRACE) {
-        advance();
+        parserAdvance();
         parseBlock();
       } else {
         throw std::runtime_error("Syntax error: unexpected token");
@@ -90,13 +93,13 @@ void Parser::parseIf() {
 
 void Parser::parseLoop() {
   if (currToken_.getType() == TokenType::WHILE) {
-    advance();
+    parserAdvance();
     expect(TokenType::LBRACE);
     parseExpression();
     expect(TokenType::RBRACE);
     parseBlock();
   } else if (currToken_.getType() == TokenType::FOR) {
-    advance();
+    parserAdvance();
     expect(TokenType::LBRACE);
     if (currToken_.getType() != TokenType::SEMICOLON) {
       parseInitialization();
@@ -147,7 +150,7 @@ void Parser::parseLiteral() {
       parseIntegerLiteral();
     }
   } else if (currToken_.getType() == TokenType::QUOTEMARK) {
-    advance();
+    parserAdvance();
     parseStringLiteral();
     expect(TokenType::QUOTEMARK);
   } else {
@@ -174,7 +177,7 @@ void Parser::parseExpression() {
 void Parser::parseLogicalOr() {
   parseLogicalAnd();
   if (currToken_.getType() == TokenType::AND) {
-    advance();
+    parserAdvance();
     parseLogicalAnd();
   }
 }
@@ -182,7 +185,7 @@ void Parser::parseLogicalOr() {
 void Parser::parseLogicalAnd() {
   parseEqNotEq();
   if (currToken_.getType() == TokenType::EQ || currToken_.getType() == TokenType::NEQ) {
-    advance();
+    parserAdvance();
     parseEqNotEq();
   }
 }
@@ -190,7 +193,7 @@ void Parser::parseLogicalAnd() {
 void Parser::parseEqNotEq() {
   parseComparison();
   if (currToken_.getType() == TokenType::EQ || currToken_.getType() == TokenType::NEQ) {
-    advance();
+    parserAdvance();
     parseComparison();
   }
 }
@@ -198,7 +201,7 @@ void Parser::parseEqNotEq() {
 void Parser::parseComparison() {
   parsePlusMinus();
   if (currToken_.getType() == TokenType::LT || currToken_.getType() == TokenType::GT) {
-    advance();
+    parserAdvance();
     parsePlusMinus();
   }
 }
@@ -206,7 +209,7 @@ void Parser::parseComparison() {
 void Parser::parsePlusMinus() {
   parseMulDiv();
   if (currToken_.getType() == TokenType::PLUS || currToken_.getType() == TokenType::MINUS) {
-    advance();
+    parserAdvance();
     parseMulDiv();
   }
 }
@@ -214,7 +217,7 @@ void Parser::parsePlusMinus() {
 void Parser::parseMulDiv() {
   parseUnaryExpression();
   if (currToken_.getType() == TokenType::MUL || currToken_.getType() == TokenType::DIV) {
-    advance();
+    parserAdvance();
     parseUnaryExpression();
   }
 }
@@ -222,20 +225,20 @@ void Parser::parseMulDiv() {
 void Parser::parseUnaryExpression() {
   parseAtomExpression();
   if (currToken_.getType() == TokenType::NOT || currToken_.getType() == TokenType::NOT) {
-    advance();
+    parserAdvance();
     parseAtomExpression();
   }
 }
 
 void Parser::parseAtomExpression() {
   if (currToken_.getType() == TokenType::LPAREN) {
-    advance();
+    parserAdvance();
     parseExpression();
     expect(TokenType::RPAREN);
   } else if (currToken_.getType() == TokenType::IDENTIFIER) {
     parseIdentifier();
     if (currToken_.getType() == TokenType::LBRACKET) {
-      advance();
+      parserAdvance();
       parseExpression();
       expect(TokenType::RBRACKET);
     }
@@ -250,7 +253,7 @@ void Parser::parseType() {
   if (isType(currToken_)) {
     if (currToken_.getValue() == "array") {
       expect(TokenType::LT);
-      // advance();
+      // parserAdvance();
       parseType();
       expect(TokenType::GT);
     }

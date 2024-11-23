@@ -273,7 +273,7 @@ int main() {
     parser.program();
     std::cout << "Syntax analyzer has completed successfully!" << std::endl;
   } catch (const std::exception& e) {
-    std::cerr << "Ошибка синтаксического анализатора: " << e.what() << std::endl;
+    std::cerr << "Parser's errors: " << e.what() << std::endl;
     return -4;
   }
 

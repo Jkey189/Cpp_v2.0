@@ -18,6 +18,8 @@ public:
   Token getLex();
   Token peek();
 
+  std::vector<Token> getTokens() { return tokenize(); }
+
 
 private:
   std::string program_;

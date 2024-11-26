@@ -9,3 +9,5 @@ while
 true
 false
 const
+cin
+cout

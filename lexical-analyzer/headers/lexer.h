@@ -15,6 +15,10 @@ public:
   }
 
   std::vector<Token> tokenize();
+  Token getLex();
+  Token peek();
+
+  std::vector<Token> getTokens() { return tokenize(); }
 
 
 private:
@@ -23,137 +27,56 @@ private:
   Trie keywords_;
 
   // Функции для проверки символа - буква, цифра, или вообще whitespace...
-  static bool isSpace(const char c) {
-    return c == ' ';
-  }
-
-  static bool isEnter(const char c) {
-    return c == '\n';
-  }
-
-  static bool isAlpha(const char c) {
-    return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
-  }
-
-  static bool isDigit(const char c) {
-    return c >= '0' && c <= '9';
-  }
-
-  static bool isAlphaNumeric(const char c) {
-    return isAlpha(c) || isDigit(c);
-  }
+  static bool isSpace(char c);
+  static bool isEnter(char c);
+  static bool isAlpha(char c);
+  static bool isDigit(char c);
+  static bool isIdentifierChar(char c);
+  [[nodiscard]] bool isComment(char);
 
   // Конвертим к слову
-  std::string getWord() {
-    size_t start = position_;
-    while (position_ < program_.length() && isAlphaNumeric(program_[position_])) {
-      ++position_;
-    }
-
-    return program_.substr(start, position_ - start);
-  }
+  std::string getWord();
 
   // А здесь получаем число
-  std::string getNumber() {
-    size_t start = position_;
-    bool hasDecimal = false;
+  std::string getNumber();
 
-    while (position_ < program_.length() && isDigit(program_[position_]) || program_[position_] == '.') {
-      if (program_[position_] == '.') {
-        if (hasDecimal) { break; }
-        hasDecimal = true;
-      }
-      ++position_;
+  // Распознаем строковый летрал
+  std::string getString();
+
+  // Распознаем комментарий
+  std::string getComment();
+
+  // Проверки для токенизации и сама токенизация
+  void initializeKeywords(const std::string& keywordsPath) const;
+
+  bool isOperator(std::string& op) const;
+
+  [[nodiscard]] Token tokenizeIdentifierOrKeyword();
+
+  static bool isKeyword(const std::string& id);
+
+  [[nodiscard]] static TokenType keywordToTokenType(const std::string& keyword);
+
+  /*Token tokenizeNumber();*/
+
+  Token tokenizeOperator(std::string& op);
+
+  static bool isBracket(char c);
+
+  static Token tokenizeBracket(char c);
+
+
+  Token parseNumber() {
+    std::string number;
+
+    while (position_ < program_.size() && isDigit(program_[position_])) {
+      number.push_back(program_[position_++]);
     }
 
-    return program_.substr(start, position_ - start);
+    return {TokenType::NUMBER, number};
   }
 
-  // Проверки для токенизации
-  void initializeKeywords(const std::string& keywordsPath) const {
-    std::ifstream keywordsFile(keywordsPath);
-
-    if (!keywordsFile.is_open()) {
-      std::cerr << "Failed to open file " << "\"" << keywordsPath << "\"" << std::endl;
-
-      if (keywordsFile.bad()) {
-        std::cerr << "Fatal error: bad-bit is set" << std::endl;
-      }
-
-      if (keywordsFile.fail()) {
-        std::cerr << "Error details: " << strerror(errno) << std::endl;
-      }
-    }
-
-    std::string keyword;
-    while (std::getline(keywordsFile, keyword)) {
-      if (!keyword.empty()) {
-        keywords_.insert(keyword);
-      }
-    }
-
-    keywordsFile.close();
-  }
-
-  bool isOperator(std::string& op) const {
-    op.clear();
-
-    const char ch = program_[position_];
-    op = std::string(1, ch);
-
-    if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
-      return false;
-    }
-
-    if ((ch == '=' || ch == '<' || ch == '>') && position_ + 1 < program_.size()) {
-      const char nextCh = program_[position_];
-
-      if ((ch == '=' && nextCh == '=') ||
-        (ch == '<' && nextCh == '=') ||
-        (ch == '>' && nextCh == '=')) {
-        op += nextCh;
-        return true;
-      }
-    }
-
-    if (ch == '<' || ch == '>') {
-      return true;
-    }
-
-    return false;
-  }
-
-  Token tokenizeIdentifierOrKeyword() {
-    const size_t start = position_;
-
-    while (position_ < program_.length() && (std::isalnum(program_[position_]) ||
-      program_[position_] == '_')) {
-      ++position_;
-    }
-
-    std::string word = program_.substr(start, position_ - start);
-    TokenType wordType = keywords_.find(word) ? TokenType::KEYWORD : TokenType::IDENTIFIER;
-
-    std::cout << "Yee. We've found an identifier!!! " << "It's a/an " << word << std::endl;
-
-    return {wordType, word};
-  }
-
-  Token tokenizeNumber() {
-    const size_t start = position_;
-
-    while (position_ < program_.length() && std::isdigit(program_[position_])) {
-      ++position_;
-    }
-
-    return {TokenType::INTEGER_NUMBER, program_.substr(start, position_ - start)};
-  }
-
-  Token tokenizeOperator(std::string& op) {
-    position_ += op.size();
-
-    return {TokenType::OPERATOR, op};
-  }
+  Token parseIdentifier();
 };
 
 

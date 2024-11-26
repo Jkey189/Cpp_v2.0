@@ -1,30 +1,7 @@
-array<int> a;
-int n;
-cin >> n;
-a.resize(n);
-for (int i = 0; i < n; ++i) {
-    cin >> a[i];
+func int main() {
+    int n = ();
+    int a = 5;
+    float _float = 4.5;
+    string str = "abc";
+    cout << a << " " <<< _float << " " str;
 }
-
-int x;
-cin >> x;
-
-int low = 0, high = n - 1;
-while (low <= high) {
-    int mid = low + (high - low) / 2;
-
-    if (a[mid] == x) {
-      cout << "Element is present at index " << mid << '\n';
-
-      return 0;
-    }
-
-    if (a[mid] < x) {
-      low = mid + 1;
-    } else {
-      high = mid - 1;
-    }
-}
-cout << "Element is not present in array" <<'\n';
-
-return 0;

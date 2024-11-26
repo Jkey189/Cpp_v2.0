@@ -1,7 +1,7 @@
 #include "../headers/tokens.h"
 
 
-TokenType Token::getLexeme() const {
+TokenType Token::getType() const {
   return type_;
 }
 

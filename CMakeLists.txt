@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(Language
         main.cpp
 
+
         includes/libraries.h
+
 
         lexical-analyzer/headers/trie.h
         lexical-analyzer/headers/tokens.h
@@ -16,4 +18,8 @@ add_executable(Language
         lexical-analyzer/sources/trie.cpp
         lexical-analyzer/sources/tokens.cpp
         lexical-analyzer/sources/lexer.cpp
+
+
+        syntax-analyzer/headers/parser.h
+        syntax-analyzer/sources/parser.cpp
 )

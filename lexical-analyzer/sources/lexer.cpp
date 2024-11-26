@@ -117,6 +117,11 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       } else {
         tokens.emplace_back(TokenType::IDENTIFIER, word);
       }
+    } else if (currChar == '/') {
+      if (isComment(currChar)) {
+        std::string comment = getComment();
+        tokens.emplace_back(TokenType::COMMENT_LITERAL, "/*" + comment + "*/");
+      }
     } else if (isOperator(op)) {
       // std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeOperator(op));
@@ -198,6 +203,8 @@ Token LexicalAnalyzer::getLex() {
       return {TokenType::NOT, "!"};
     case '\"':
       return {TokenType::QUOTEMARK, "\""};
+    case '\\':
+      return {TokenType::NEXT_STATEMENT, "\\"};
     default:
       throw std::runtime_error("Unknown character: " + std::string(1, currChar));
   }
@@ -230,6 +237,17 @@ bool LexicalAnalyzer::isIdentifierChar(const char c) {
   return isAlpha(c) || isDigit(c) || c == '_';
 }
 
+bool LexicalAnalyzer::isComment(const char c) {
+  if (position_ + 1 < program_.size()) {
+    ++position_;
+    if (program_[position_] == '*') {
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
 
 std::string LexicalAnalyzer::getWord() {
   const size_t start = position_;
@@ -260,9 +278,30 @@ std::string LexicalAnalyzer::getNumber() {
 std::string LexicalAnalyzer::getString() {
   ++position_;
   const size_t start = position_;
+  bool isSpecialSymbol = true;
+  bool end = false;
 
-  while (position_ < program_.size() && program_[position_] != '\"') {
-    ++position_;
+  for (;;) {
+    while (position_ < program_.size()) {
+      if (program_[position_] == '\\') {
+        isSpecialSymbol = true;
+      } else {
+        isSpecialSymbol = false;
+      }
+
+      if (program_[position_] == '\"') {
+        if (isSpecialSymbol) {
+          ++position_;
+        } else {
+          end = true;
+          break;
+        }
+      }
+    }
+
+    if (position_ >= program_.size() || end) {
+      break;
+    }
   }
 
   /*std::string str;
@@ -272,10 +311,38 @@ std::string LexicalAnalyzer::getString() {
     throw std::runtime_error("Lexer error: unexpected lexeme | must be `\"'");
   }*/
 
+  if (!end) {
+    throw std::runtime_error("Lexer error: unexpected token | impossible to use only one \"");
+  }
+
   std::string str = program_.substr(start, position_ - start);
   ++position_;
 
   return str;
+}
+
+std::string LexicalAnalyzer::getComment() {
+  ++position_;
+  const size_t start = position_;
+
+  for (;;) {
+    while (position_ < program_.size() && program_[position_] != '*') {
+      ++position_;
+    }
+
+    if (position_ < program_.size()) {
+      if (program_[position_ + 1] == '/') {
+        break;
+      }
+    } else {
+      break;
+    }
+  }
+
+  std::string comment = program_.substr(start, position_ - start);
+  position_ += 2;
+
+  return comment;
 }
 
 
@@ -311,7 +378,7 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
   const char ch = program_[position_];
   op = std::string(1, ch);
 
-  if (ch == ',' || ch == ':' || ch == ';') {
+  if (ch == ',' || ch == ':' || ch == ';' || ch == '\\') {
     return true;
   }
 
@@ -343,6 +410,7 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
     }
 
     if (ch != nextChar && !isSpace(nextChar) && !isEnter(nextChar)) {
+      op += nextChar;
       throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use `" + op + "'");
     }
   }
@@ -519,6 +587,9 @@ Token LexicalAnalyzer::tokenizeOperator(std::string& op) {
   }
   if (op == ";") {
     return {TokenType::SEMICOLON, op};
+  }
+  if (op == "\\") {
+    return {TokenType::NEXT_STATEMENT, op};
   }
   return {TokenType::UNKNOWN, op};
 }

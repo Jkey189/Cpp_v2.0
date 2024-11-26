@@ -32,6 +32,7 @@ private:
   static bool isAlpha(char c);
   static bool isDigit(char c);
   static bool isIdentifierChar(char c);
+  [[nodiscard]] bool isComment(char);
 
   // Конвертим к слову
   std::string getWord();
@@ -41,6 +42,9 @@ private:
 
   // Распознаем строковый летрал
   std::string getString();
+
+  // Распознаем комментарий
+  std::string getComment();
 
   // Проверки для токенизации и сама токенизация
   void initializeKeywords(const std::string& keywordsPath) const;

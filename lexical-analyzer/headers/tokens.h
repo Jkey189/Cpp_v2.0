@@ -11,6 +11,7 @@ enum class TokenType {
 
   NUMBER, IDENTIFIER, IF, ELSE, SWITCH, CASE, DEFAULT, FOR, WHILE, RETURN, BREAK, CONTINUE,
 
+  COMMENT_LITERAL,
   INTEGER_LITERAL,
   FLOAT_LITERAL,
   STRING_LITERAL,
@@ -32,6 +33,7 @@ enum class TokenType {
   OR, // ||
   NOT, // !
   QUOTEMARK, // "
+  NEXT_STATEMENT, // \
 
   LPAREN, // (
   RPAREN, // )

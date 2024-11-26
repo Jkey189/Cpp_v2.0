@@ -278,24 +278,23 @@ std::string LexicalAnalyzer::getNumber() {
 std::string LexicalAnalyzer::getString() {
   ++position_;
   const size_t start = position_;
-  bool isSpecialSymbol = true;
+  bool isSpecialSymbol = false;
   bool end = false;
 
   for (;;) {
     while (position_ < program_.size()) {
       if (program_[position_] == '\\') {
-        isSpecialSymbol = true;
-      } else {
-        isSpecialSymbol = false;
-      }
-
-      if (program_[position_] == '\"') {
-        if (isSpecialSymbol) {
+        if (position_ < program_.size()) {
           ++position_;
         } else {
-          end = true;
-          break;
+          throw std::runtime_error("Lexer error: unexpected token | impossible to use only `\\'");
         }
+      } else if (program_[position_] == '\"') {
+        ++position_;
+        end = true;
+        break;
+      } else {
+        ++position_;
       }
     }
 
@@ -312,7 +311,7 @@ std::string LexicalAnalyzer::getString() {
   }*/
 
   if (!end) {
-    throw std::runtime_error("Lexer error: unexpected token | impossible to use only one \"");
+    throw std::runtime_error("Lexer error: unexpected token | impossible to use only one `\"'");
   }
 
   std::string str = program_.substr(start, position_ - start);

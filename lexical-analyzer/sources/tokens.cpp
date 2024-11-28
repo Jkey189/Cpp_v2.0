@@ -1,7 +1,7 @@
 #include "../headers/tokens.h"
 
 
-TokenType Token::getType() const {
+my::TokenType Token::getType() const {
   return type_;
 }
 

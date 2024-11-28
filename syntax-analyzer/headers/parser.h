@@ -47,10 +47,10 @@ private:
 
 
   static bool isType(const Token& token) {
-    return token.getType() == TokenType::INT || token.getType() == TokenType::FLOAT ||
-      token.getType() == TokenType::CHAR || token.getType() == TokenType::BOOL ||
-        token.getType() == TokenType::VOID ||token.getType() == TokenType::STRING ||
-          token.getType() == TokenType::ARRAY || token.getType() == TokenType::IDENTIFIER;
+    return token.getType() == my::TokenType::INT || token.getType() == my::TokenType::FLOAT ||
+      token.getType() == my::TokenType::CHAR || token.getType() == my::TokenType::BOOL ||
+        token.getType() == my::TokenType::VOID ||token.getType() == my::TokenType::STRING ||
+          token.getType() == my::TokenType::ARRAY || token.getType() == my::TokenType::IDENTIFIER;
   }
 
 
@@ -60,7 +60,7 @@ private:
 
   
 
-  void expect(TokenType type) {
+  void expect(my::TokenType type) {
     if (currToken_.getType() != type) {
       throw std::runtime_error("Syntax error: unexpected token | wrong token type");
     }
@@ -94,11 +94,11 @@ private:
     // add operator
     if (currToken_.getValue() == "cin") {
 
-    } else if (currToken_.getType() == TokenType::IF) {
+    } else if (currToken_.getType() == my::TokenType::IF) {
       parseIf();
-    } else if (currToken_.getType() == TokenType::FOR || currToken_.getType() == TokenType::WHILE) {
+    } else if (currToken_.getType() == my::TokenType::FOR || currToken_.getType() == my::TokenType::WHILE) {
       parseLoop();
-    } else if (currToken_.getType() == TokenType::SWITCH) {
+    } else if (currToken_.getType() == my::TokenType::SWITCH) {
       parseSwitch();
     } else if (currToken_.getValue() == "func") {
       parseFunction();
@@ -109,47 +109,47 @@ private:
 
   // оператор
   void parseOperator() {
-    if (lexer_.peek().getType() == TokenType::COMMA) {
+    if (lexer_.peek().getType() == my::TokenType::COMMA) {
       parseOperator();
-      expect(TokenType::COMMA);
+      expect(my::TokenType::COMMA);
       parseOperator();
-    } else if (currToken_.getType() == TokenType::IDENTIFIER) {
-      if (lexer_.peek().getType() == TokenType::ASSIGN) {
+    } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+      if (lexer_.peek().getType() == my::TokenType::ASSIGN) {
         parseIdentifier();
-        expect(TokenType::ASSIGN);
+        expect(my::TokenType::ASSIGN);
         parseExpression();
-        expect(TokenType::SEMICOLON);
+        expect(my::TokenType::SEMICOLON);
       } else {
         parseVariable();
-        expect(TokenType::SEMICOLON);
+        expect(my::TokenType::SEMICOLON);
       }
 
       /*parseIdentifier();
       parserAdvance();
 
-      if (currToken_.getType() == TokenType::ASSIGN) {
+      if (currToken_.getType() == my::TokenType::ASSIGN) {
         parserAdvance();
         parseExpression();
-        expect(TokenType::SEMICOLON);
-      } else if (currToken_.getType() == TokenType::SEMICOLON) {
+        expect(my::TokenType::SEMICOLON);
+      } else if (currToken_.getType() == my::TokenType::SEMICOLON) {
         parserAdvance();
       } else {
         throw std::runtime_error("Syntax error: unexpected token");
       }*/
-    } else if (currToken_.getType() == TokenType::RETURN) {
+    } else if (currToken_.getType() == my::TokenType::RETURN) {
       parserAdvance();
       parseExpression();
-      expect(TokenType::SEMICOLON);
-    } else if (currToken_.getType() == TokenType::BREAK || currToken_.getType() == TokenType::CONTINUE) {
+      expect(my::TokenType::SEMICOLON);
+    } else if (currToken_.getType() == my::TokenType::BREAK || currToken_.getType() == my::TokenType::CONTINUE) {
       parserAdvance();
-      expect(TokenType::SEMICOLON);
-    } else if (currToken_.getType() == TokenType::IF ||
-      currToken_.getType() == TokenType::FOR || currToken_.getType() == TokenType::WHILE ||
-      currToken_.getType() == TokenType::SWITCH ||
+      expect(my::TokenType::SEMICOLON);
+    } else if (currToken_.getType() == my::TokenType::IF ||
+      currToken_.getType() == my::TokenType::FOR || currToken_.getType() == my::TokenType::WHILE ||
+      currToken_.getType() == my::TokenType::SWITCH ||
       currToken_.getValue() == "func") { // add operator
       parseStatement();
-      expect(TokenType::SEMICOLON);
-    } else if (currToken_.getType() == TokenType::SEMICOLON) {
+      expect(my::TokenType::SEMICOLON);
+    } else if (currToken_.getType() == my::TokenType::SEMICOLON) {
       parserAdvance();
     } else {
       throw std::runtime_error("Syntax error: unexpected token | `parseOperator()' error");
@@ -167,18 +167,18 @@ private:
     if (isType(currToken_)) {
       parseType();
     }
-    if (currToken_.getType() == TokenType::IDENTIFIER) {
+    if (currToken_.getType() == my::TokenType::IDENTIFIER) {
       parserAdvance();
-      if (currToken_.getType() == TokenType::ASSIGN) {
+      if (currToken_.getType() == my::TokenType::ASSIGN) {
         parserAdvance();
-        if (currToken_.getType() == TokenType::IDENTIFIER) {
+        if (currToken_.getType() == my::TokenType::IDENTIFIER) {
           parserAdvance();
         } else if (isNumber(currToken_.getValue())) {
           parserAdvance();
         } else {
           throw std::runtime_error("Syntax error: unexpected token | `parseInitialization()' error");
         }
-        expect(TokenType::SEMICOLON);
+        expect(my::TokenType::SEMICOLON);
       } else {
         throw std::runtime_error("Syntax error: unexpected token | `parseInitialization()' error");
       }

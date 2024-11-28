@@ -55,7 +55,7 @@ private:
 
   static bool isKeyword(const std::string& id);
 
-  [[nodiscard]] static TokenType keywordToTokenType(const std::string& keyword);
+  [[nodiscard]] static my::TokenType keywordToTokenType(const std::string& keyword);
 
   /*Token tokenizeNumber();*/
 
@@ -73,7 +73,7 @@ private:
       number.push_back(program_[position_++]);
     }
 
-    return {TokenType::NUMBER, number};
+    return {my::TokenType::NUMBER, number};
   }
 
   Token parseIdentifier();

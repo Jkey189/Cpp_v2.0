@@ -1,7 +1,7 @@
 #include "../headers/parser.h"
 
 void Parser::parseProgram() {
-  while (currToken_.getType() != TokenType::END) {
+  while (currToken_.getType() != my::TokenType::END) {
     parseDeclaration();
   }
 }
@@ -16,7 +16,7 @@ void Parser::parseDeclaration() {
     }
   } else if (isType(currToken_)) {
     parseStatement();
-  } else if (lexer_.peek().getType() == TokenType::IDENTIFIER) { // ???
+  } else if (lexer_.peek().getType() == my::TokenType::IDENTIFIER) { // ???
     parseVariable();
   } else {
     throw std::runtime_error("Syntax error: unexpected token | `parseDeclaration()' error");
@@ -28,9 +28,9 @@ void Parser::parseFunction() {
     parserAdvance();
     parseType();
     parseIdentifier();
-    expect(TokenType::LPAREN);
+    expect(my::TokenType::LPAREN);
     parseParams();
-    expect(TokenType::RPAREN);
+    expect(my::TokenType::RPAREN);
     parseBlock();
   } else {
     throw std::runtime_error("Syntax error: unexpected token | `parseFunction()' error");
@@ -47,42 +47,42 @@ void Parser::parseParams() {
 
 void Parser::parseParam() {
   parseType();
-  expect(TokenType::IDENTIFIER);
+  expect(my::TokenType::IDENTIFIER);
 }
 
 void Parser::parseVariable() {
-  expect(TokenType::IDENTIFIER);
+  expect(my::TokenType::IDENTIFIER);
 }
 
 void Parser::parseBlock() {
-  expect(TokenType::LBRACE);
-  while (currToken_.getType() != TokenType::RBRACE) {
+  expect(my::TokenType::LBRACE);
+  while (currToken_.getType() != my::TokenType::RBRACE) {
     if (currToken_.getValue() == "\\") {
       parseStatement();
     } else {
       throw std::runtime_error("Syntax error: unexpected token | `parseBlock()' error");
     }
   }
-  expect(TokenType::RBRACE);
+  expect(my::TokenType::RBRACE);
 }
 
 void Parser::parseIf() {
-  expect(TokenType::IF);
-  expect(TokenType::LPAREN);
-  if (currToken_.getType() == TokenType::RPAREN) {
+  expect(my::TokenType::IF);
+  expect(my::TokenType::LPAREN);
+  if (currToken_.getType() == my::TokenType::RPAREN) {
     throw std::runtime_error("Syntax error: unexpected token | `parseIf()' error");
   }
   parseExpression();
-  expect(TokenType::RPAREN);
+  expect(my::TokenType::RPAREN);
   parseBlock();
 
-  if (currToken_.getType() == TokenType::ELSE) {
+  if (currToken_.getType() == my::TokenType::ELSE) {
     parserAdvance();
     parseBlock();
 
-    /*if (lexer_.peek().getType() == TokenType::IF) {
+    /*if (lexer_.peek().getType() == my::TokenType::IF) {
         parseIf();
-      } else if (lexer_.peek().getType() == TokenType::LBRACE) {
+      } else if (lexer_.peek().getType() == my::TokenType::LBRACE) {
         parserAdvance();
         parseBlock();
       } else {
@@ -92,27 +92,27 @@ void Parser::parseIf() {
 }
 
 void Parser::parseLoop() {
-  if (currToken_.getType() == TokenType::WHILE) {
+  if (currToken_.getType() == my::TokenType::WHILE) {
     parserAdvance();
-    expect(TokenType::LBRACE);
+    expect(my::TokenType::LBRACE);
     parseExpression();
-    expect(TokenType::RBRACE);
+    expect(my::TokenType::RBRACE);
     parseBlock();
-  } else if (currToken_.getType() == TokenType::FOR) {
+  } else if (currToken_.getType() == my::TokenType::FOR) {
     parserAdvance();
-    expect(TokenType::LBRACE);
-    if (currToken_.getType() != TokenType::SEMICOLON) {
+    expect(my::TokenType::LBRACE);
+    if (currToken_.getType() != my::TokenType::SEMICOLON) {
       parseInitialization();
     }
-    expect(TokenType::SEMICOLON);
-    if (currToken_.getType() != TokenType::SEMICOLON) {
+    expect(my::TokenType::SEMICOLON);
+    if (currToken_.getType() != my::TokenType::SEMICOLON) {
       parseExpression();
     }
-    expect(TokenType::SEMICOLON);
-    if (currToken_.getType() != TokenType::SEMICOLON) {
+    expect(my::TokenType::SEMICOLON);
+    if (currToken_.getType() != my::TokenType::SEMICOLON) {
       parseStep();
     }
-    expect(TokenType::RBRACE);
+    expect(my::TokenType::RBRACE);
   } else {
     throw std::runtime_error("Syntax error: unexpected token | `parseLoop()' error");
   }
@@ -123,23 +123,23 @@ void Parser::parseStep() {
 }
 
 void Parser::parseSwitch() {
-  expect(TokenType::SWITCH);
-  expect(TokenType::LPAREN);
+  expect(my::TokenType::SWITCH);
+  expect(my::TokenType::LPAREN);
   parseExpression();
-  expect(TokenType::RPAREN);
-  expect(TokenType::LBRACE);
-  while (currToken_.getType() == TokenType::CASE) {
+  expect(my::TokenType::RPAREN);
+  expect(my::TokenType::LBRACE);
+  while (currToken_.getType() == my::TokenType::CASE) {
     parseLiteral();
-    expect(TokenType::COLON);
+    expect(my::TokenType::COLON);
     parseBlock();
   }
-  if (currToken_.getType() == TokenType::DEFAULT) {
-    expect(TokenType::COLON);
+  if (currToken_.getType() == my::TokenType::DEFAULT) {
+    expect(my::TokenType::COLON);
     parseBlock();
   } else {
     throw std::runtime_error("Syntax error: unexpected token | `parseSwitch()' error");
   }
-  expect(TokenType::RBRACE);
+  expect(my::TokenType::RBRACE);
 }
 
 void Parser::parseLiteral() {
@@ -149,25 +149,25 @@ void Parser::parseLiteral() {
     } else {
       parseIntegerLiteral();
     }
-  } else if (currToken_.getType() == TokenType::QUOTEMARK) {
+  } else if (currToken_.getType() == my::TokenType::QUOTEMARK) {
     parserAdvance();
     parseStringLiteral();
-    expect(TokenType::QUOTEMARK);
+    expect(my::TokenType::QUOTEMARK);
   } else {
     throw std::runtime_error("Syntax error: unexpected token | `parseLiteral()' error");
   }
 }
 
 void Parser::parseIntegerLiteral() {
-  expect(TokenType::INTEGER_LITERAL);
+  expect(my::TokenType::INTEGER_LITERAL);
 }
 
 void Parser::parseFloatLiteral() {
-  expect(TokenType::FLOAT_LITERAL);
+  expect(my::TokenType::FLOAT_LITERAL);
 }
 
 void Parser::parseStringLiteral() {
-  expect(TokenType::STRING_LITERAL);
+  expect(my::TokenType::STRING_LITERAL);
 }
 
 void Parser::parseExpression() {
@@ -176,7 +176,7 @@ void Parser::parseExpression() {
 
 void Parser::parseLogicalOr() {
   parseLogicalAnd();
-  if (currToken_.getType() == TokenType::AND) {
+  if (currToken_.getType() == my::TokenType::AND) {
     parserAdvance();
     parseLogicalAnd();
   }
@@ -184,7 +184,7 @@ void Parser::parseLogicalOr() {
 
 void Parser::parseLogicalAnd() {
   parseEqNotEq();
-  if (currToken_.getType() == TokenType::EQ || currToken_.getType() == TokenType::NEQ) {
+  if (currToken_.getType() == my::TokenType::EQ || currToken_.getType() == my::TokenType::NEQ) {
     parserAdvance();
     parseEqNotEq();
   }
@@ -192,7 +192,7 @@ void Parser::parseLogicalAnd() {
 
 void Parser::parseEqNotEq() {
   parseComparison();
-  if (currToken_.getType() == TokenType::EQ || currToken_.getType() == TokenType::NEQ) {
+  if (currToken_.getType() == my::TokenType::EQ || currToken_.getType() == my::TokenType::NEQ) {
     parserAdvance();
     parseComparison();
   }
@@ -200,7 +200,7 @@ void Parser::parseEqNotEq() {
 
 void Parser::parseComparison() {
   parsePlusMinus();
-  if (currToken_.getType() == TokenType::LT || currToken_.getType() == TokenType::GT) {
+  if (currToken_.getType() == my::TokenType::LT || currToken_.getType() == my::TokenType::GT) {
     parserAdvance();
     parsePlusMinus();
   }
@@ -208,7 +208,7 @@ void Parser::parseComparison() {
 
 void Parser::parsePlusMinus() {
   parseMulDiv();
-  if (currToken_.getType() == TokenType::PLUS || currToken_.getType() == TokenType::MINUS) {
+  if (currToken_.getType() == my::TokenType::PLUS || currToken_.getType() == my::TokenType::MINUS) {
     parserAdvance();
     parseMulDiv();
   }
@@ -216,7 +216,7 @@ void Parser::parsePlusMinus() {
 
 void Parser::parseMulDiv() {
   parseUnaryExpression();
-  if (currToken_.getType() == TokenType::MUL || currToken_.getType() == TokenType::DIV) {
+  if (currToken_.getType() == my::TokenType::MUL || currToken_.getType() == my::TokenType::DIV) {
     parserAdvance();
     parseUnaryExpression();
   }
@@ -224,25 +224,25 @@ void Parser::parseMulDiv() {
 
 void Parser::parseUnaryExpression() {
   parseAtomExpression();
-  if (currToken_.getType() == TokenType::NOT || currToken_.getType() == TokenType::NOT) {
+  if (currToken_.getType() == my::TokenType::NOT || currToken_.getType() == my::TokenType::NOT) {
     parserAdvance();
     parseAtomExpression();
   }
 }
 
 void Parser::parseAtomExpression() {
-  if (currToken_.getType() == TokenType::LPAREN) {
+  if (currToken_.getType() == my::TokenType::LPAREN) {
     parserAdvance();
     parseExpression();
-    expect(TokenType::RPAREN);
-  } else if (currToken_.getType() == TokenType::IDENTIFIER) {
+    expect(my::TokenType::RPAREN);
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
     parseIdentifier();
-    if (currToken_.getType() == TokenType::LBRACKET) {
+    if (currToken_.getType() == my::TokenType::LBRACKET) {
       parserAdvance();
       parseExpression();
-      expect(TokenType::RBRACKET);
+      expect(my::TokenType::RBRACKET);
     }
-  } else if (isNumber(currToken_.getValue()) || currToken_.getType() == TokenType::QUOTEMARK) {
+  } else if (isNumber(currToken_.getValue()) || currToken_.getType() == my::TokenType::QUOTEMARK) {
     parseLiteral();
   } else {
     throw std::runtime_error("Syntax error: unexpected token | `parseAtomExpression()' error");
@@ -252,10 +252,10 @@ void Parser::parseAtomExpression() {
 void Parser::parseType() {
   if (isType(currToken_)) {
     if (currToken_.getValue() == "array") {
-      expect(TokenType::LT);
+      expect(my::TokenType::LT);
       // parserAdvance();
       parseType();
-      expect(TokenType::GT);
+      expect(my::TokenType::GT);
     }
   } else {
     throw std::runtime_error("Syntax error: unexpected token");

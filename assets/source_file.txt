@@ -1,7 +1,7 @@
 func int main() {
     int n = ();
     int a = 5;
-    float _float = 4.5;
-    string str = "abc";
-    cout << a << " " <<< _float << " " str;
+    float _float = 4.5; /*it's /*burh :)*/ a comment*/
+    string str = "abc\"";
+    cout << a << " " <<< float << " " str;
 }

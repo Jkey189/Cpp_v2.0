@@ -3,104 +3,104 @@
 #include "syntax-analyzer/headers/parser.h"
 
 
-std::string getTokenValue(const TokenType token) {
+std::string getTokenValue(const my::TokenType token) {
   switch (token) {
-    case TokenType::KEYWORD:
+    case my::TokenType::KEYWORD:
       return "KEYWORD";
-    case TokenType::INT:
+    case my::TokenType::INT:
       return "INT";
-    case TokenType::FLOAT:
+    case my::TokenType::FLOAT:
       return "FLOAT";
-    case TokenType::BOOL:
+    case my::TokenType::BOOL:
       return "BOOL";
-    case TokenType::VOID:
+    case my::TokenType::VOID:
       return "VOID";
-    case TokenType::STRING:
+    case my::TokenType::STRING:
       return "STRING";
-    case TokenType::ARRAY:
+    case my::TokenType::ARRAY:
       return "ARRAY";
-    case TokenType::NUMBER:
+    case my::TokenType::NUMBER:
       return "NUMBER";
-    case TokenType::IDENTIFIER:
+    case my::TokenType::IDENTIFIER:
       return "IDENTIFIER";
-    case TokenType::IF:
+    case my::TokenType::IF:
       return "IF";
-    case TokenType::ELSE:
+    case my::TokenType::ELSE:
       return "ELSE";
-    case TokenType::SWITCH:
+    case my::TokenType::SWITCH:
       return "SWITCH";
-    case TokenType::CASE:
+    case my::TokenType::CASE:
       return "CASE";
-    case TokenType::DEFAULT:
+    case my::TokenType::DEFAULT:
       return "DEFAULT";
-    case TokenType::FOR:
+    case my::TokenType::FOR:
       return "FOR";
-    case TokenType::WHILE:
+    case my::TokenType::WHILE:
       return "WHILE";
-    case TokenType::RETURN:
+    case my::TokenType::RETURN:
       return "RETURN";
-    case TokenType::BREAK:
+    case my::TokenType::BREAK:
       return "BREAK";
-    case TokenType::CONTINUE:
+    case my::TokenType::CONTINUE:
       return "CONTINUE";
-    case TokenType::INTEGER_LITERAL:
+    case my::TokenType::INTEGER_LITERAL:
       return "INTEGER_LITERAL";
-    case TokenType::FLOAT_LITERAL:
+    case my::TokenType::FLOAT_LITERAL:
       return "FLOAT_LITERAL";
-    case TokenType::STRING_LITERAL:
+    case my::TokenType::STRING_LITERAL:
       return "STRING_LITERAL";
-    case TokenType::ASSIGN:
+    case my::TokenType::ASSIGN:
       return "ASSIGN";
-    case TokenType::PLUS:
+    case my::TokenType::PLUS:
       return "PLUS";
-    case TokenType::MINUS:
+    case my::TokenType::MINUS:
       return "MINUS";
-    case TokenType::MUL:
+    case my::TokenType::MUL:
       return "MUL";
-    case TokenType::DIV:
+    case my::TokenType::DIV:
       return "DIV";
-    case TokenType::LT:
+    case my::TokenType::LT:
       return "LT";
-    case TokenType::GT:
+    case my::TokenType::GT:
       return "GT";
-    case TokenType::EQ:
+    case my::TokenType::EQ:
       return "EQ";
-    case TokenType::NEQ:
+    case my::TokenType::NEQ:
       return "NEQ";
-    case TokenType::AND:
+    case my::TokenType::AND:
       return "AND";
-    case TokenType::OR:
+    case my::TokenType::OR:
       return "OR";
-    case TokenType::NOT:
+    case my::TokenType::NOT:
       return "NOT";
-    case TokenType::LPAREN:
+    case my::TokenType::LPAREN:
       return "LPAREN";
-    case TokenType::RPAREN:
+    case my::TokenType::RPAREN:
       return "RPAREN";
-    case TokenType::LBRACE:
+    case my::TokenType::LBRACE:
       return "LBRACE";
-    case TokenType::RBRACE:
+    case my::TokenType::RBRACE:
       return "RBRACE";
-    case TokenType::LBRACKET:
+    case my::TokenType::LBRACKET:
       return "LBRACKET";
-    case TokenType::RBRACKET:
+    case my::TokenType::RBRACKET:
       return "RBRACKET";
-    case TokenType::COMMA:
+    case my::TokenType::COMMA:
       return "COMMA";
-    case TokenType::SEMICOLON:
+    case my::TokenType::SEMICOLON:
       return "SEMICOLON";
-    case TokenType::COLON:
+    case my::TokenType::COLON:
       return "COLON";
-    case TokenType::END:
+    case my::TokenType::END:
       return "END";
-    default: // TokenType::UNKNOWN
+    default: // my::TokenType::UNKNOWN
       return "UNKNOWN";
   }
 }
 
 void printTokens(const std::vector<Token>& tokens) {
   for (auto& currToken : tokens) {
-    std::cout << "Token value: " << currToken.getValue() << std::endl;;
+    std::cout << "Token value: " << currToken.getValue() << std::endl;
     std::cout << "Token type: " << getTokenValue(currToken.getType()) << std::endl;
     /*std::cout << "Token position: line: " << currToken.getLine() << std::endl;
     std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;*/
@@ -192,72 +192,6 @@ int main() {
   const std::vector<Token> tokens = lexer.tokenize();
 
   // std::cout << "Source code:\n" << sourceCode << std::endl << std::endl;
-
-  /*bool first = true;
-  while (COUNT < 6) {
-    ++COUNT;
-    if (COUNT == 5 && first) {
-      break;
-    }
-    first = false;
-
-    std::cout << "[ ";
-    if (COUNT == 1) {
-      first = false;
-      if (rng() % 2 != 0) {
-        std::cout << static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248) <<
-          static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
-      } else {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248) <<
-          static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
-      }
-    }
-    if (COUNT == 2) {
-      first = false;
-      if (rng() % 2 != 0) {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
-      } else {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
-      }
-    }
-    if (COUNT == 3) {
-      first = false;
-      if (rng() % 2 != 0) {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248) << static_cast<char>(248);
-      } else {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248);
-      }
-    }
-    if (COUNT == 4) {
-      first = false;
-      if (rng() % 2 != 0) {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248) << static_cast<char>(248);
-      } else {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(248);
-      }
-    }
-    if (COUNT == 5) {
-      first = false;
-      if (rng() % 2 != 0) {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219);
-      } else {
-        std::cout << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) <<
-          static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219) << static_cast<char>(219);
-      }
-    }
-    std::cout << " ]";
-
-    std::cout << std::endl;
-    ++COUNT;
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  }*/
   std::cout << "Tokenization completed." << std::endl << std::endl << std::endl;
   std::cout << "Tokens in this source code:" << std::endl << std::endl;
   /*std::this_thread::sleep_for(std::chrono::milliseconds(500));*/

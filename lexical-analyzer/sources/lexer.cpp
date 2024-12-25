@@ -79,73 +79,13 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
 }
 
 Token LexicalAnalyzer::getLex() {
-  if (position_ >= program_.size()) {
-    return {my::TokenType::END, ""};
-  }
-
-  const char currChar = program_[position_];
-
-  if (isSpace(currChar) || isEnter(currChar)) {
-    ++position_;
-  }
-
-  if (isDigit(currChar)) {
-    parseNumber();
-  }
-
-  if (isAlpha(currChar)) {
-    parseIdentifier();
-  }
-
-  switch (currChar) {
-    case '(':
-      return {my::TokenType::LPAREN, "("};
-    case ')':
-      return {my::TokenType::RPAREN, ")"};
-    case '{':
-      return {my::TokenType::LBRACE, "{"};
-    case '}':
-      return {my::TokenType::RBRACE, "}"};
-    case '[':
-      return {my::TokenType::LBRACKET, "["};
-    case ']':
-      return {my::TokenType::RBRACKET, "]"};
-    case ',':
-      return {my::TokenType::COMMA, ","};
-    case ';':
-      return {my::TokenType::SEMICOLON, ";"};
-    case ':':
-      return {my::TokenType::COLON, ":"};
-    case '=':
-      return {my::TokenType::ASSIGN, "="};
-    case '+':
-      return {my::TokenType::PLUS, "+"};
-    case '-':
-      return {my::TokenType::MINUS, "-"};
-    case '*':
-      return {my::TokenType::MUL, "*"};
-    case '/':
-      return {my::TokenType::DIV, "/"};
-    case '<':
-      return {my::TokenType::LT, "<"};
-    case '>':
-      return {my::TokenType::GT, ">"};
-    case '!':
-      return {my::TokenType::NOT, "!"};
-    case '\"':
-      return {my::TokenType::QUOTEMARK, "\""};
-    case '\\':
-      return {my::TokenType::NEXT_STATEMENT, "\\"};
-    default:
-      throw std::runtime_error("Unknown character: " + std::string(1, currChar));
-  }
+  return getTokens().at(0);
 }
 
-Token LexicalAnalyzer::peek() {
-  const size_t savedPosition = position_;
-  Token nextToken = getLex();
-  position_ = savedPosition;
-  return nextToken;
+Token LexicalAnalyzer::peek(const size_t ind) {
+  return ind < getTokens().size() ? getTokens()[ind + 1] :
+  (getTokens()[ind + 1].getType() == my::TokenType::END) ? getTokens()[ind + 1] :
+  throw std::runtime_error("memory corrupt");
 }
 
 bool LexicalAnalyzer::isSpace(const char c) {
@@ -358,9 +298,7 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
   }
 
   if ((ch == '&' || ch == '|') && position_ + 1 < program_.size()) {
-    const char nextChar = program_[position_ + 1];
-
-    if (ch == nextChar) {
+    if (const char nextChar = program_[position_ + 1]; ch == nextChar) {
       op += nextChar;
     } else {
       op += nextChar;

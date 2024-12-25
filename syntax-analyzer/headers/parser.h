@@ -4,6 +4,7 @@
 
 #include <complex>
 
+#include "../../global_functions/global_funcs.h"
 #include "../../includes/libraries.h"
 #include "../../lexical-analyzer/headers/lexer.h"
 
@@ -60,8 +61,11 @@ private:
 
 
   void expect(const my::TokenType type) {
-    if (currToken_.getType() != type) {
-      throw std::runtime_error("Syntax error: unexpected token | wrong token type");
+    if (currToken_.getType() != type) { // make expected throw more informative
+      throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
+        "' (line: " +  std::to_string(currToken_.getLine()) +
+        ", column: " + std::to_string(currToken_.getColumn()) +
+        "), Expected: " + getTokenValue(type));
     }
     parserAdvance();
   }

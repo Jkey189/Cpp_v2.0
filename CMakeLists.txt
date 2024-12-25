@@ -10,6 +10,8 @@ add_executable(Language
 
         includes/libraries.h
 
+        global_functions/global_funcs.h
+
 
         lexical-analyzer/headers/trie.h
         lexical-analyzer/headers/tokens.h

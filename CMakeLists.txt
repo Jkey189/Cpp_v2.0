@@ -22,4 +22,10 @@ add_executable(Language
 
         syntax-analyzer/headers/parser.h
         syntax-analyzer/sources/parser.cpp
+
+
+        semantic-analyzer/headers/semantic.h
+        semantic-analyzer/sources/semantic.cpp
+        semantic-analyzer/TID/tid.cpp
+        semantic-analyzer/TID/tid.h
 )

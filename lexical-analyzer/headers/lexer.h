@@ -16,12 +16,13 @@ public:
 
   std::vector<Token> tokenize();
   Token getLex();
-  Token peek();
+  Token peek(size_t ind);
 
   std::vector<Token> getTokens() { return tokenize(); }
 
 
 private:
+  size_t ind = 0;
   std::string program_;
   size_t position_;
   Trie keywords_;
@@ -64,17 +65,6 @@ private:
   static bool isBracket(char c);
 
   static Token tokenizeBracket(char c);
-
-
-  Token parseNumber() {
-    std::string number;
-
-    while (position_ < program_.size() && isDigit(program_[position_])) {
-      number.push_back(program_[position_++]);
-    }
-
-    return {my::TokenType::NUMBER, number};
-  }
 
   Token parseIdentifier();
 };

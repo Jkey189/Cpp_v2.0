@@ -2,6 +2,10 @@
 #include "lexical-analyzer/headers/lexer.h"
 #include "syntax-analyzer/headers/parser.h"
 
+#include <filesystem>
+
+#include "semantic-analyzer/headers/semantic.h"
+
 
 std::string getTokenValue(const my::TokenType token) {
   switch (token) {
@@ -19,8 +23,6 @@ std::string getTokenValue(const my::TokenType token) {
       return "STRING";
     case my::TokenType::ARRAY:
       return "ARRAY";
-    case my::TokenType::NUMBER:
-      return "NUMBER";
     case my::TokenType::IDENTIFIER:
       return "IDENTIFIER";
     case my::TokenType::IF:
@@ -99,20 +101,29 @@ std::string getTokenValue(const my::TokenType token) {
 }
 
 void printTokens(const std::vector<Token>& tokens) {
-  for (auto& currToken : tokens) {
+  for (const auto& currToken : tokens) {
+    std::cout << "Token value: " << currToken.getValue() << '\n';
+    std::cout << "Token type: " << getTokenValue(currToken.getType()) << '\n';
+    std::cout << std::endl;
+  }
+
+  /*for (auto& currToken : tokens) {
     std::cout << "Token value: " << currToken.getValue() << std::endl;
     std::cout << "Token type: " << getTokenValue(currToken.getType()) << std::endl;
     /*std::cout << "Token position: line: " << currToken.getLine() << std::endl;
-    std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;*/
+    std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;#1#
     std::cout << std::endl;
-    /*std::this_thread::sleep_for(std::chrono::milliseconds(500));*/
-  }
+    /*std::this_thread::sleep_for(std::chrono::milliseconds(500));#1#
+  }*/
 }
 
 
 int main() {
+  std::filesystem::__cxx11::path filePath = "../assets/source_file.cppt";
+  std::cout << "File extension: " << filePath.extension() << std::endl;
+
   // Пути к файлам с кодом и keywords
-  const std::string fileName = "../assets/source_file.txt";
+  const std::string fileName = "../assets/source_file.cppt";
   const std::string keywordsPath = "../assets/keywords.txt";
 
   // Открываем файл...
@@ -203,13 +214,28 @@ int main() {
   std::cout << std::endl << std::endl << std::endl << std::endl;
   Parser parser(lexer);
 
-  try {
+  parser.program();
+  std::cout << "Syntax analyzer has completed successfully!" << std::endl;
+
+  /*try {
     parser.program();
     std::cout << "Syntax analyzer has completed successfully!" << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "Parser's errors: " << e.what() << std::endl;
     return -4;
-  }
+  }*/
+
+  /*if (std::filesystem::current_path("../assets/source_file.cppt") == "txt") {
+    std::cout << "OK" << std::endl;
+  } else {
+    std::cout << "BAD" << std::endl;
+  }*/
+
+  std::map<std::string, my::TokenType> symbolTable;
+  /*symbolTable.emplace("func", my::TokenType::IDENTIFIER);*/
+  TID tid(symbolTable);
+  SemanticAnalyzer semantic(parser, tid);
+  semantic.analyze();
 
   return 0;
 }

@@ -72,7 +72,7 @@ void Parser::parseBlock() {
 }
 
 void Parser::parseInstruction() {
-  if (currToken_.getType() == my::TokenType::LBRACE) { // { blocks body }
+  if (currToken_.getType() == my::TokenType::LBRACE) { // { block's body }
     parseBlock();
   } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cin") {  // `cin` >> ...
     parseInput();
@@ -175,14 +175,14 @@ void Parser::parseLoop() {
 
     expect(my::TokenType::RPAREN); // )
 
-    parseBlock(); // { loops `for` body }
+    parseBlock(); // { loop's `for` body }
   } else if (currToken_.getType() == my::TokenType::WHILE) {
     parserAdvance(); // while
 
     expect(my::TokenType::LPAREN); // (
     parseExpression(); // condition
     expect(my::TokenType::RPAREN); // )
-    parseBlock(); // { loops `while` body }
+    parseBlock(); // { loop's `while` body }
   }/* else {
     throw std::runtime_error("Syntax error: invalid loop name.");
   }*/
@@ -221,24 +221,43 @@ void Parser::parseAssignment() {
       throw std::runtime_error("Syntax error: assignment expected");
     }
 
-    expect(my::TokenType::LBRACKET);
-    parseIndex();
-    expect(my::TokenType::RBRACKET);
+    expect(my::TokenType::LBRACKET); // `[`
+    parseIndex(); // `index`
+    expect(my::TokenType::RBRACKET); // `]`
   }
 
-  expect(my::TokenType::ASSIGN);
-  parseExpression();
-  expect(my::TokenType::SEMICOLON);
+  expect(my::TokenType::ASSIGN); // `=`
+  parseExpression(); // = `expression`
+  expect(my::TokenType::SEMICOLON); // `;`
 }
 
 void Parser::parseStep() {
-  parseExpression();
+  parseExpression(); // `step` (for example: i = i + 1)
 }
 
 void Parser::parseSwitch() {
-  expect(my::TokenType::SWITCH);
-  expect(my::TokenType::LPAREN);
-  parseExpression();
+  expect(my::TokenType::SWITCH); // `switch`
+  expect(my::TokenType::LPAREN); // `(`
+  parseExpression(); // `condition`
+  expect(my::TokenType::RPAREN); // `)`
+
+  expect(my::TokenType::LBRACE); // `{`
+
+  while (currToken_.getType() == my::TokenType::CASE) { // `case` ...
+    parserAdvance(); // `case`
+    parseLiteral(); // case `literal`
+    expect(my::TokenType::COLON); // `:`
+    parseBlock(); // case's body
+  }
+
+  if (currToken_.getType() == my::TokenType::DEFAULT) { // `default` ...
+    parserAdvance(); // `default`
+    parseLiteral(); // default 'literal'
+    expect(my::TokenType::COLON); // `:`
+    parseBlock(); // default's block
+  }
+
+   expect(my::TokenType::RBRACE); // `}`
 }
 
 void Parser::parseIndex() {

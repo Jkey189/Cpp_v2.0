@@ -103,7 +103,7 @@ private:
 
   void parseSwitch();
 
-  // void parseLiteral();
+  void parseLiteral();
 
   void parseIntegerLiteral();
 

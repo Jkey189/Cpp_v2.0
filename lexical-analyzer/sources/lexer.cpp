@@ -43,7 +43,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
         tokens.emplace_back(my::TokenType::STRING, word);
       }  else if (word == "array") {
         tokens.emplace_back(my::TokenType::ARRAY, word);
-      } else if (keywords_.find(word) /*isKeyword(word)*/) {
+      } else if (keywords_.find(word) && isKeyword(word)) {
         tokens.emplace_back(my::TokenType::KEYWORD, word);
       } else {
         tokens.emplace_back(my::TokenType::IDENTIFIER, word);
@@ -65,6 +65,9 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
     } else if (currChar == '\"') {
       std::string str = getString();
       tokens.emplace_back(my::TokenType::STRING_LITERAL, "\"" + str + "\"");
+    } else if (currChar == '\'') {
+      std::string charLiter = getCharLiteral();
+      tokens.emplace_back(my::TokenType::CHAR_LITERAL, "\'" + charLiter + "\'");
     } else {
       // std::cout << "Unknown..." << std::endl << std::endl; // Для проверки
       tokens.emplace_back(my::TokenType::UNKNOWN, std::string(1, currChar));
@@ -198,6 +201,16 @@ std::string LexicalAnalyzer::getString() {
   return answer;
 }
 
+std::string LexicalAnalyzer::getCharLiteral() {
+  ++position_;
+  const char charLiter = program_[position_++];
+  if (program_[position_] != '\'') {
+    throw std::runtime_error("Lexer error: unclosed character literal");
+  }
+  ++position_;
+  return std::string(1, charLiter);
+}
+
 std::string LexicalAnalyzer::getComment() {
   ++position_;
   const size_t start = position_;
@@ -269,17 +282,13 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
   }
 
   if (ch == '=' && position_ + 1 < program_.size()) {
-    const char nextChar = program_[position_ + 1];
-
-    if (nextChar == '=') {
+    if (const char nextChar = program_[position_ + 1]; nextChar == '=') {
       op += nextChar;
     }
   }
 
   if (ch == '!' && position_ + 1 < program_.size()) {
-    const char nextChar = program_[position_ + 1];
-
-    if (nextChar == '=') {
+    if (const char nextChar = program_[position_ + 1]; nextChar == '=') {
       op += nextChar;
     }
   }
@@ -319,6 +328,16 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
 
 Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() {
   const size_t start = position_;
+  while (position_ < program_.size() && isIdentifierChar(program_[position_])) {
+    ++position_;
+  }
+  std::string identifier = program_.substr(start, position_ - start);
+  if (keywords_.find(identifier) || isKeyword(identifier)) {
+    return {my::TokenType::KEYWORD, identifier};
+  }
+  return {my::TokenType::IDENTIFIER, identifier};
+
+  /*const size_t start = position_;
 
   while (position_ < program_.size() && isIdentifierChar(program_[position_])) {
     ++position_;
@@ -329,12 +348,13 @@ Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() {
   if (isKeyword(identifier)) {
     return {my::TokenType::KEYWORD, identifier};
   }
-  return {my::TokenType::IDENTIFIER, identifier};
+  return {my::TokenType::IDENTIFIER, identifier};*/
 }
 
 bool LexicalAnalyzer::isKeyword(const std::string& id) {
-  if (id == "cin" || id == "cout" || id == "if" || id == "else" || id == "switch" || id == "case" || id == "break" || id == "continue" ||
-    id == "for" || id == "while" || id == "true" || id == "false" || id == "const") {
+  if (id == "if" || id == "else" || id == "switch" || id == "case" || id == "continue" || id == "break" ||
+    id == "for" || id == "while" || id == "true" || id == "false" || id == "const" ||
+    id == "cin" || id == "cout" || id == "func") {
     return true;
   }
   return false;

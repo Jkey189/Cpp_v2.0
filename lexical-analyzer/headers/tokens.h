@@ -15,7 +15,6 @@ namespace my {
     INTEGER_LITERAL,
     FLOAT_LITERAL,
     STRING_LITERAL,
-    BOOL_LITERAL,
     CHAR_LITERAL,
 
     IN, // >>

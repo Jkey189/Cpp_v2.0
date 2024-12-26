@@ -20,6 +20,8 @@ inline std::string getTokenValue(const my::TokenType token) {
       return "VOID";
     case my::TokenType::STRING:
       return "STRING";
+    case my::TokenType::CHAR:
+      return "CHAR";
     case my::TokenType::ARRAY:
       return "ARRAY";
     case my::TokenType::IDENTIFIER:
@@ -44,12 +46,16 @@ inline std::string getTokenValue(const my::TokenType token) {
       return "BREAK";
     case my::TokenType::CONTINUE:
       return "CONTINUE";
+    case my::TokenType::COMMENT_LITERAL:
+      return "COMMENT_LITERAL";
     case my::TokenType::INTEGER_LITERAL:
       return "INTEGER_LITERAL";
     case my::TokenType::FLOAT_LITERAL:
       return "FLOAT_LITERAL";
     case my::TokenType::STRING_LITERAL:
       return "STRING_LITERAL";
+    case my::TokenType::CHAR_LITERAL:
+      return "CHAR_LITERAL";
     case my::TokenType::ASSIGN:
       return "ASSIGN";
     case my::TokenType::PLUS:

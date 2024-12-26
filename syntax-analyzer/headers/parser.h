@@ -77,11 +77,51 @@ private:
 
   void parseDeclaration();
 
-  void parseInstruction();
-
   void parseFunction();
 
-  void parseIdentification();
+  void parseParameters();
+
+  void parseParameter();
+
+  void parseBlock();
+
+  void parseInstruction();
+
+  void parseInput();
+
+  void parseOutput();
+
+  void parseConditional();
+
+  void parseLoop();
+
+  void parseInitialization();
+
+  void parseAssignment();
+
+  void parseStep();
+
+  void parseSwitch();
+
+  void parseLiteral();
+
+  void parseCommentLiteral();
+
+  void parseIntegerLiteral();
+
+  void parseFloatLiteral();
+
+  void parseStringLiteral();
+
+  void parseCharLiteral();
+
+  void parseExpression();
+
+  void parseIndex();
+
+  void parseType();
+
+  void parseIdentifier();  // last statement
 };
 
 

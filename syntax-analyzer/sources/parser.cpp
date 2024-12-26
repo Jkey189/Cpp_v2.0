@@ -306,13 +306,6 @@ void Parser::parseStringLiteral() {
   parserAdvance();
 }
 
-void Parser::parseBoolLiteral() {
-  if (currToken_.getType() != my::TokenType::BOOL_LITERAL) {
-    throw std::runtime_error("Syntax error: expected a boolean literal, got '" + currToken_.getValue() + "'");
-  }
-  parserAdvance();
-}
-
 void Parser::parseCharLiteral() {
   if (currToken_.getType() != my::TokenType::CHAR_LITERAL) {
     throw std::runtime_error("Syntax error: expected a char literal, got '" + currToken_.getValue() + "'");

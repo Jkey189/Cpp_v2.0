@@ -113,8 +113,6 @@ private:
 
   void parseStringLiteral();
 
-  void parseBoolLiteral();
-
   void parseCharLiteral();
 
   void parseExpression();

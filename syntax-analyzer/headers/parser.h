@@ -25,7 +25,7 @@ public:
     if (currCount < lexer_.getTokens().size()) {
       return lexer_.getTokens()[currCount++];
     }
-    throw std::runtime_error("Unexpected ");
+    throw std::runtime_error("Syntax error: unexpected end of input.");
   }
 
   static bool isType(const Token& token) {
@@ -81,51 +81,7 @@ private:
 
   void parseFunction();
 
-  void parseBlock();
-
-  void parseInput();
-
-  void parseOutput();
-
-  void parseExpression();
-
-  void parseLoop();
-
-  void parseSwitch();
-
-  void parseIdentifier();
-
-  void parseInitialization();
-
-  void parseStep();
-
-  void parseNumber();
-
-  void parseLiteral();
-
-  void parseIntegerLiteral();
-
-  void parseFloatLiteral();
-
-  void parseStringLiteral();
-
-  void parseLogicalOr();
-
-  void parseLogicalAnd();
-
-  void parseLogicalComparison();
-
-  void parsePlusMinus();
-
-  void parseMulDiv();
-
-  void parseUnary();
-
-  void parseComma();
-
-  void parseAtom();
-
-  void parseType();
+  void parseIdentification();
 };
 
 

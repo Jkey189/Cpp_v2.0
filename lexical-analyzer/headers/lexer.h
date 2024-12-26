@@ -44,6 +44,9 @@ private:
   // Распознаем строковый летрал
   std::string getString();
 
+  // Распознаем символьный литерал
+  std::string getCharLiteral();
+
   // Распознаем комментарий
   std::string getComment();
 

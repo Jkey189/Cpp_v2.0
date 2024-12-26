@@ -260,6 +260,66 @@ void Parser::parseSwitch() {
    expect(my::TokenType::RBRACE); // `}`
 }
 
+void Parser::parseLiteral() {
+  if (currToken_.getType() ==my::TokenType::COMMENT_LITERAL) {
+    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::INTEGER_LITERAL) {
+    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::FLOAT_LITERAL) {
+    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::STRING_LITERAL) {
+    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::BOOL_LITERAL) {
+    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::CHAR_LITERAL) {
+    parseIntegerLiteral();
+  } else {
+    throw std::runtime_error("Syntax error: invalid literal.");
+  }
+}
+
+void Parser::parseCommentLiteral() {
+  if (currToken_.getType() != my::TokenType::COMMENT_LITERAL) {
+    throw std::runtime_error("Syntax error: expected a comment literal, got '" + currToken_.getValue() + "'");
+  }
+  parserAdvance();
+}
+
+void Parser::parseIntegerLiteral() {
+  if (currToken_.getType() != my::TokenType::INTEGER_LITERAL) {
+    throw std::runtime_error("Syntax error: expected an integer literal, got '" + currToken_.getValue() + "'");
+  }
+  parserAdvance();
+}
+
+void Parser::parseFloatLiteral() {
+  if (currToken_.getType() != my::TokenType::FLOAT_LITERAL) {
+    throw std::runtime_error("Syntax error: expected a float literal, got '" + currToken_.getValue() + "'");
+  }
+  parserAdvance();
+}
+
+void Parser::parseStringLiteral() {
+  if (currToken_.getType() != my::TokenType::STRING_LITERAL) {
+    throw std::runtime_error("Syntax error: expected a string literal, got '" + currToken_.getValue() + "'");
+  }
+  parserAdvance();
+}
+
+void Parser::parseBoolLiteral() {
+  if (currToken_.getType() != my::TokenType::BOOL_LITERAL) {
+    throw std::runtime_error("Syntax error: expected a boolean literal, got '" + currToken_.getValue() + "'");
+  }
+  parserAdvance();
+}
+
+void Parser::parseCharLiteral() {
+  if (currToken_.getType() != my::TokenType::CHAR_LITERAL) {
+    throw std::runtime_error("Syntax error: expected a char literal, got '" + currToken_.getValue() + "'");
+  }
+  parserAdvance();
+}
+
 void Parser::parseIndex() {
   parserAdvance();
 

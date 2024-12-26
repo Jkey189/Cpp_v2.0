@@ -105,11 +105,17 @@ private:
 
   void parseLiteral();
 
+  void parseCommentLiteral();
+
   void parseIntegerLiteral();
 
-  // void parseFloatLiteral();
+  void parseFloatLiteral();
 
-  // void parseStringLiteral();
+  void parseStringLiteral();
+
+  void parseBoolLiteral();
+
+  void parseCharLiteral();
 
   void parseExpression();
 

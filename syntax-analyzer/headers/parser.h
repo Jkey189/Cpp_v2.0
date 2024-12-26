@@ -4,6 +4,7 @@
 
 #include <complex>
 
+#include "../../global_functions/global_funcs.h"
 #include "../../includes/libraries.h"
 #include "../../lexical-analyzer/headers/lexer.h"
 
@@ -21,7 +22,10 @@ public:
   }
 
   Token parserAdvance() {
-    return lexer_.getTokens()[currCount++];
+    if (currCount < lexer_.getTokens().size()) {
+      return lexer_.getTokens()[currCount++];
+    }
+    throw std::runtime_error("Syntax error: unexpected end of input.");
   }
 
   static bool isType(const Token& token) {
@@ -60,8 +64,11 @@ private:
 
 
   void expect(const my::TokenType type) {
-    if (currToken_.getType() != type) {
-      throw std::runtime_error("Syntax error: unexpected token | wrong token type");
+    if (currToken_.getType() != type) { // make expected throw more informative
+      throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
+        "' (line: " +  std::to_string(currToken_.getLine()) +
+        ", column: " + std::to_string(currToken_.getColumn()) +
+        "), Expected: " + getTokenValue(type));
     }
     parserAdvance();
   }
@@ -74,51 +81,7 @@ private:
 
   void parseFunction();
 
-  void parseBlock();
-
-  void parseInput();
-
-  void parseOutput();
-
-  void parseExpression();
-
-  void parseLoop();
-
-  void parseSwitch();
-
-  void parseIdentifier();
-
-  void parseInitialization();
-
-  void parseStep();
-
-  void parseNumber();
-
-  void parseLiteral();
-
-  void parseIntegerLiteral();
-
-  void parseFloatLiteral();
-
-  void parseStringLiteral();
-
-  void parseLogicalOr();
-
-  void parseLogicalAnd();
-
-  void parseLogicalComparison();
-
-  void parsePlusMinus();
-
-  void parseMulDiv();
-
-  void parseUnary();
-
-  void parseComma();
-
-  void parseAtom();
-
-  void parseType();
+  void parseIdentification();
 };
 
 

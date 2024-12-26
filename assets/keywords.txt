@@ -11,3 +11,4 @@ false
 const
 cin
 cout
+func

@@ -22,7 +22,10 @@ public:
   }
 
   Token parserAdvance() {
-    return lexer_.getTokens()[currCount++];
+    if (currCount < lexer_.getTokens().size()) {
+      return lexer_.getTokens()[currCount++];
+    }
+    throw std::runtime_error("Unexpected ");
   }
 
   static bool isType(const Token& token) {

@@ -69,6 +69,45 @@ void Parser::parseBlock() {
   expect(my::TokenType::RBRACE);
 }
 
+/*void Parser::parseInstruction() {
+  std::cout << "Parsing instruction: '" << currToken_.getValue() << "' (Type: "
+            << getTokenValue(currToken_.getType()) << ")" << std::endl;
+
+  if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "func") {
+
+  } else if (currToken_.getType() == my::TokenType::LBRACE) {
+    parseBlock();
+  } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cin") {
+    parseInput();
+  } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cout") {
+    parseOutput();
+  } else if (currToken_.getType() == my::TokenType::IF) {
+    parseConditional();
+  } else if (currToken_.getType() == my::TokenType::FOR || currToken_.getType() == my::TokenType::WHILE) {
+    parseLoop();
+  } else if (currToken_.getType() == my::TokenType::SWITCH) {
+    parseSwitch();
+  } else if (currToken_.getType() == my::TokenType::BREAK || currToken_.getType() == my::TokenType::CONTINUE) {
+    parserAdvance();
+    expect(my::TokenType::SEMICOLON);
+  } else if (currToken_.getType() == my::TokenType::RETURN) {
+    parserAdvance();
+    parseExpression();
+    expect(my::TokenType::SEMICOLON);
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    Token variableToken = currToken_;
+    if (lexer_.peek(currCount).getType() == my::TokenType::ASSIGN) {
+      parseAssignment();
+    } else {
+      parseExpression();
+    }
+  } else if (currToken_.getType() == my::TokenType::SEMICOLON) {
+    parserAdvance();
+  } else {
+    throw std::runtime_error("Syntax error: invalid instruction.");
+  }
+}*/
+
 void Parser::parseInstruction() {
   if (currToken_.getType() == my::TokenType::LPAREN) {
     parserAdvance();

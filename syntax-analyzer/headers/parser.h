@@ -11,15 +11,61 @@
 
 class Parser {
 public:
-  explicit Parser(LexicalAnalyzer& lexer): lexer_(lexer), currToken_(lexer.getLex()) {
-    /*currToken_ = lexer_.getLex();*/
+  explicit Parser(LexicalAnalyzer& lexer) : lexer_(lexer), currToken_(lexer.getLex()) {
+    std::cout << "Number of tokens in Lexer: " << lexer_.getTokens().size() << std::endl;
+
+    /*const auto& tokens = lexer_.getTokens();
+    std::cout << "Tokens in Parser constructor:" << std::endl;
+    for (const auto& token : tokens) {
+      std::cout << "Token: " << token.getValue()
+                << " (Type: " << getTokenValue(token.getType())
+                << ", Line: " << token.getLine()
+                << ", Column: " << token.getColumn() << ")" << std::endl;
+    }*/
+
     parserAdvance();
   }
 
+  /*explicit Parser(const LexicalAnalyzer& lexer) : currCount(0), lexer_(lexer), currToken_(lexer_.getLex()) {
+    parserAdvance();
+
+    std::cout << "Parser initialized with first token: '" << currToken_.getValue()
+          << "' (Type: " << getTokenValue(currToken_.getType())
+          << ", Line: " << currToken_.getLine()
+          << ", Column: " << currToken_.getColumn() << ")" << std::endl;
+
+
+    /*const auto tokens = lexer_.getTokens();
+
+    std::cout << "Tokens received from lexer:" << std::endl;
+    for (const auto &token: tokens) {
+      std::cout << "Token: " << token.getValue()
+          << " (Type: " << getTokenValue(token.getType())
+          << ", Line: " << token.getLine()
+          << ", Column: " << token.getColumn() << ")" << std::endl;
+    }
+
+    if (tokens.empty()) {
+      throw std::runtime_error("Lexer returned an empty token list.");
+    }
+
+    currToken_ = tokens.at(currCount++)#1#;
+  }*/
+
   void program() {
+    while (currToken_.getType() != my::TokenType::END) {
+      std::cout << "Processing token in program: '" << currToken_.getValue()
+                << "' (Type: " << getTokenValue(currToken_.getType())
+                << ", Line: " << currToken_.getLine()
+                << ", Column: " << currToken_.getColumn() << ")" << std::endl;
+      parseDeclaration();
+    }
+  }
+
+  /*void program() {
     parserAdvance();
     parseProgram();
-  }
+  }*/
 
   [[nodiscard]] LexicalAnalyzer getLexer() const { return lexer_; }
 
@@ -34,10 +80,33 @@ public:
     parserAdvance();
   }
 
-  Token parserAdvance() {
+  void parserAdvance() {
+    const auto& tokens = lexer_.getTokens(); // Получаем токены из лексера
+    if (tokens.empty()) {
+      throw std::runtime_error("Parser error: no tokens received from lexer.");
+    }
+
+    if (currCount >= tokens.size()) {
+      throw std::runtime_error("Parser error: unexpected end of input.");
+    }
+
+    currToken_ = tokens[currCount++];
+    std::cout << "Advanced to token: '" << currToken_.getValue()
+              << "' (Type: " << getTokenValue(currToken_.getType())
+              << ", Line: " << currToken_.getLine()
+              << ", Column: " << currToken_.getColumn() << ")" << std::endl;
+  }
+
+  /*Token parserAdvance() {
     if (currToken_.getType() == my::TokenType::END) {
       return currToken_;
     }
+
+    // Отладочный вывод текущего токена
+    std::cout << "Current token: " << currToken_.getValue()
+              << " (Type: " << getTokenValue(currToken_.getType())
+              << ", Line: " << currToken_.getLine()
+              << ", Column: " << currToken_.getColumn() << ")" << std::endl;
 
     if (currCount < lexer_.getTokens().size() - 1) { // checking boards
       currToken_ = lexer_.getTokens()[currCount++];
@@ -48,7 +117,7 @@ public:
       return currToken_;
     }
     throw std::runtime_error("Syntax error: unexpected end of input.");
-  }
+  }*/
 
   /*Token parserAdvance() {
     if (currCount < lexer_.getTokens().size()) {

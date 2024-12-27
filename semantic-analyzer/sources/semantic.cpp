@@ -50,26 +50,34 @@ void SemanticAnalyzer::checkVariable(const Token& token) {
   }
 
   // Проверяем, если это часть присваивания, совпадают ли типы lvalue и rvalue
-  const Token& currToken = parser_.getCurrToken();
-
-  if (currToken.getType() == my::TokenType::ASSIGN) {
+  if (parser_.getCurrToken().getType() == my::TokenType::ASSIGN) {
     parser_.parserAdvance(); // Пропускаем '='
-
     Token nextToken = parser_.getCurrToken();
 
     // Получаем тип переменной (lvalue)
     my::TokenType variableType = tid_.getType(token.getValue());
 
-    // Получаем тип значения (rvalue)
+    // Определяем тип rvalue
     my::TokenType valueType;
     if (nextToken.getType() == my::TokenType::IDENTIFIER) {
-      checkVariable(nextToken); // Проверяем, объявлена ли переменная rvalue
+      if (!tid_.exists(nextToken.getValue())) {
+        throw std::runtime_error("Semantic error: variable '" + nextToken.getValue() +
+                                 "' not declared at line " + std::to_string(nextToken.getLine()) +
+                                 ", column " + std::to_string(nextToken.getColumn()) + ".");
+      }
       valueType = tid_.getType(nextToken.getValue());
-    } else {
+    } else if (nextToken.getType() == my::TokenType::INTEGER_LITERAL ||
+               nextToken.getType() == my::TokenType::FLOAT_LITERAL ||
+               nextToken.getType() == my::TokenType::STRING_LITERAL ||
+               nextToken.getType() == my::TokenType::CHAR_LITERAL) {
       valueType = nextToken.getType();
+    } else {
+      throw std::runtime_error("Semantic error: invalid value assigned to variable '" +
+                               token.getValue() + "' at line " + std::to_string(nextToken.getLine()) +
+                               ", column " + std::to_string(nextToken.getColumn()) + ".");
     }
 
-    // Сравниваем типы
+    // Проверяем соответствие типов
     if (variableType != valueType) {
       throw std::runtime_error("Semantic error: type mismatch in assignment to '" +
                                token.getValue() + "' at line " + std::to_string(token.getLine()) +
@@ -214,6 +222,7 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
         currToken.getType() == my::TokenType::STRING_LITERAL ||
         currToken.getType() == my::TokenType::CHAR_LITERAL) {
       output.push_back(currToken.getValue());
+      parser_.parserAdvance();
     }
 
     // Если это оператор
@@ -226,11 +235,13 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
         operators.pop();
       }
       operators.push(currToken.getValue());
+      parser_.parserAdvance();
     }
 
     // Если это открывающая скобка
     else if (currToken.getType() == my::TokenType::LPAREN) {
       operators.push(currToken.getValue());
+      parser_.parserAdvance();
     }
 
     // Если это закрывающая скобка
@@ -243,9 +254,15 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
         throw std::runtime_error("Semantic error: mismatched parentheses.");
       }
       operators.pop(); // Убираем '(' из стека
+      parser_.parserAdvance();
     }
 
-    parser_.parserAdvance();
+    // Любой другой случай - ошибка
+    else {
+      throw std::runtime_error("Semantic error: unexpected token '" + currToken.getValue() +
+                               "' at line " + std::to_string(currToken.getLine()) +
+                               ", column " + std::to_string(currToken.getColumn()) + ".");
+    }
   }
 
   // Выгружаем оставшиеся операторы
@@ -259,6 +276,7 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
 
   return output;
 }
+
 
 // Вспомогательный метод для приоритетов операций
 int SemanticAnalyzer::getPrecedence(const std::string& op) {

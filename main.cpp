@@ -98,7 +98,7 @@ int main() {
 
   // Выводим только что считанное содержимое для проверки
   std::cout << "Full source code content:" << std::endl;
-  std::cout << "``````````````````````````````cpp_v2.0``````````````````````````````" << std::endl;
+  std::cout << "````````````````````````````````Cppt````````````````````````````````" << std::endl;
   std::cout << sourceCode << std::endl;
   std::cout << "````````````````````````````````````````````````````````````````````" << std::endl;
 
@@ -143,29 +143,23 @@ int main() {
   // std::map<std::string, my::TokenType> symbolTable;
 
   /*symbolTable.emplace("func", my::TokenType::IDENTIFIER);*/
-  /*try {
+  try {
     TID tid;
     SemanticAnalyzer semanticAnalyzer(parser, tid);
     semanticAnalyzer.analyze();
+
     std::cout << "Semantic analysis completed successfully!" << std::endl;
+    // Генерация ПОЛИЗ
+    std::vector<std::string> rpn = semanticAnalyzer.generateRPN();
+    std::cout << "Generated RPN:" << std::endl;
+    for (const auto& token : rpn) {
+      std::cout << token << " ";
+    }
+    std::cout << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "Error during semantic analysis: " << e.what() << std::endl;
     return -1;
-  }*/
-
-  TID tid;
-  SemanticAnalyzer semantic(parser, tid);
-
-  // Анализ семантики
-  semantic.analyze();
-
-  // Генерация ПОЛИЗ
-  std::vector<std::string> rpn = semantic.generateRPN();
-  std::cout << "Generated RPN:" << std::endl;
-  for (const auto& token : rpn) {
-    std::cout << token << " ";
   }
-  std::cout << std::endl;
 
   return 0;
 }

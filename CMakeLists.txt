@@ -28,6 +28,4 @@ add_executable(Language
 
         semantic-analyzer/headers/semantic.h
         semantic-analyzer/sources/semantic.cpp
-        semantic-analyzer/TID/tid.cpp
-        semantic-analyzer/TID/tid.h
 )

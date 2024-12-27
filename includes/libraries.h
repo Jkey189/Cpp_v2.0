@@ -17,6 +17,7 @@
 #include <thread>
 #include <cstdlib>
 #include <random>
+#include <stack>
 
 
 // const variables

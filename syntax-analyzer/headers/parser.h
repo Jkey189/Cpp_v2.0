@@ -21,6 +21,19 @@ public:
     parseProgram();
   }
 
+  [[nodiscard]] LexicalAnalyzer getLexer() const { return lexer_; }
+
+
+  void expect(const my::TokenType type) {
+    if (currToken_.getType() != type) { // make expected throw more informative
+      throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
+        "' (line: " +  std::to_string(currToken_.getLine()) +
+        ", column: " + std::to_string(currToken_.getColumn()) +
+        "), Expected: " + getTokenValue(type));
+    }
+    parserAdvance();
+  }
+
   Token parserAdvance() {
     if (currToken_.getType() == my::TokenType::END) {
       return currToken_;
@@ -78,16 +91,6 @@ private:
     return true;
   }
 
-
-  void expect(const my::TokenType type) {
-    if (currToken_.getType() != type) { // make expected throw more informative
-      throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
-        "' (line: " +  std::to_string(currToken_.getLine()) +
-        ", column: " + std::to_string(currToken_.getColumn()) +
-        "), Expected: " + getTokenValue(type));
-    }
-    parserAdvance();
-  }
 
   void parseProgram();
 

@@ -1,5 +1,7 @@
 #include "../headers/parser.h"
 
+#include <bits/ranges_algo.h>
+
 
 std::string typeToString(const my::TokenType& tokenType) {
   switch (tokenType) {
@@ -197,6 +199,7 @@ void Parser::parseOutput() {
 
 void Parser::parseConditional() {
   expect(my::TokenType::IF);
+  parserAdvance();
   expect(my::TokenType::LPAREN);
   parseExpression();
   expect(my::TokenType::RPAREN);
@@ -212,6 +215,7 @@ void Parser::parseLoop() {
   if (currToken_.getType() == my::TokenType::FOR) { // for (`initialization`; `condition`; `step`) ...
     parserAdvance(); // for
     expect(my::TokenType::LPAREN); // (
+    parserAdvance();
 
     // condition
     if (isType(currToken_)) { // `type`
@@ -264,6 +268,7 @@ void Parser::parseInitialization() {
   */
 
   parseType(); // `type`
+  parserAdvance();
   parseIdentifier(); // `identifier`
 
   if (currToken_.getType() != my::TokenType::ASSIGN) { // it must be '='
@@ -285,6 +290,26 @@ void Parser::parseInitialization() {
 
 void Parser::parseAssignment() {
   parseIdentifier(); // Левый операнд
+  // Проверяем возможный доступ к элементам массива
+  while (currToken_.getType() != my::TokenType::ASSIGN) {
+    if (currToken_.getType() == my::TokenType::LBRACKET) {
+      parserAdvance();
+      parseIndex();
+      expect(my::TokenType::RBRACKET);
+    } else {
+      throw std::runtime_error("Syntax error: invalid token, Expected: RBRACKET `]`");
+    }
+  }
+  // Ожидаем оператор присваивания
+  expect(my::TokenType::ASSIGN); // `=`
+  // Разбираем выражение справа от '='
+  parseExpression();
+  // Заканчиваем инструкцию
+  expect(my::TokenType::SEMICOLON); // `;`
+}
+
+/*void Parser::parseAssignment() {
+  parseIdentifier(); // Левый операнд
 
   // Проверяем возможный доступ к элементам массива
   while (currToken_.getType() != my::TokenType::ASSIGN) {
@@ -305,7 +330,7 @@ void Parser::parseAssignment() {
 
   // Заканчиваем инструкцию
   expect(my::TokenType::SEMICOLON); // `;`
-}
+}*/
 
 /*void Parser::parseAssignment() {
   parseIdentifier();
@@ -355,16 +380,21 @@ void Parser::parseSwitch() {
 }
 
 void Parser::parseLiteral() {
-  if (currToken_.getType() ==my::TokenType::COMMENT_LITERAL) { // comment
+  if (currToken_.getType() == my::TokenType::COMMENT_LITERAL) { // comment
     parseCommentLiteral();
-  } else if (currToken_.getType() ==my::TokenType::INTEGER_LITERAL) { // int
+  } else if (currToken_.getType() == my::TokenType::INTEGER_LITERAL) { // int
     parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::FLOAT_LITERAL) { // float
+  } else if (currToken_.getType() == my::TokenType::FLOAT_LITERAL) { // float
     parseFloatLiteral();
-  } else if (currToken_.getType() ==my::TokenType::STRING_LITERAL) { // string
+  } else if (currToken_.getType() == my::TokenType::STRING_LITERAL) { // string
     parseStringLiteral();
-  } else if (currToken_.getType() ==my::TokenType::CHAR_LITERAL) { // char
+  } else if (currToken_.getType() == my::TokenType::CHAR_LITERAL) { // char
     parseCharLiteral();
+  } if (currToken_.getType() == my::TokenType::KEYWORD &&
+    (currToken_.getValue() == "true" || currToken_.getValue() == "false")) {
+    parserAdvance();
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    parserAdvance();
   } else {
     throw std::runtime_error("Syntax error: invalid literal."); // error
   }

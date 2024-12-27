@@ -29,7 +29,27 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
     } else if (isIdentifierChar(currChar)) {
       std::string word = getWord();
 
-      if (word == "int") {
+      if (word == "if") {
+        tokens.emplace_back(my::TokenType::IF, word);
+      } else if (word == "else") {
+        tokens.emplace_back(my::TokenType::ELSE, word);
+      } else if (word == "switch") {
+        tokens.emplace_back(my::TokenType::SWITCH, word);
+      } else if (word == "case") {
+        tokens.emplace_back(my::TokenType::CASE, word);
+      } else if (word == "default") {
+        tokens.emplace_back(my::TokenType::DEFAULT, word);
+      } else if (word == "return") {
+        tokens.emplace_back(my::TokenType::RETURN, word);
+      } else if (word == "break") {
+        tokens.emplace_back(my::TokenType::BREAK, word);
+      } else if (word == "continue") {
+        tokens.emplace_back(my::TokenType::CONTINUE, word);
+      } else if (word == "for") {
+        tokens.emplace_back(my::TokenType::FOR, word);
+      } else if (word == "while") {
+        tokens.emplace_back(my::TokenType::WHILE, word);
+      } else if (word == "int") {
         tokens.emplace_back(my::TokenType::INT, word);
       } else if (word == "float") {
         tokens.emplace_back(my::TokenType::FLOAT, word);
@@ -362,8 +382,7 @@ Token LexicalAnalyzer::tokenizeIdentifierOrKeyword() {
 }
 
 bool LexicalAnalyzer::isKeyword(const std::string& id) {
-  if (id == "if" || id == "else" || id == "switch" || id == "case" || id == "continue" || id == "break" ||
-    id == "for" || id == "while" || id == "true" || id == "false" || id == "const" ||
+  if (id == "true" || id == "false" || id == "const" ||
     id == "cin" || id == "cout" || id == "func") {
     return true;
   }

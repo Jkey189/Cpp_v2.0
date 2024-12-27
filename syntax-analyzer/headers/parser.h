@@ -22,11 +22,27 @@ public:
   }
 
   Token parserAdvance() {
+    if (currToken_.getType() == my::TokenType::END) {
+      return currToken_;
+    }
+
+    if (currCount < lexer_.getTokens().size() - 1) { // checking boards
+      currToken_ = lexer_.getTokens()[currCount++];
+      return currToken_;
+    } else if (currCount == lexer_.getTokens().size() - 1) { // last token
+      currToken_ = lexer_.getTokens()[currCount];
+      ++currCount; // update index
+      return currToken_;
+    }
+    throw std::runtime_error("Syntax error: unexpected end of input.");
+  }
+
+  /*Token parserAdvance() {
     if (currCount < lexer_.getTokens().size()) {
       return lexer_.getTokens()[currCount++];
     }
     throw std::runtime_error("Syntax error: unexpected end of input.");
-  }
+  }*/
 
   static bool isType(const Token& token) {
     return token.getType() == my::TokenType::INT || token.getType() == my::TokenType::FLOAT ||
@@ -116,6 +132,24 @@ private:
   void parseCharLiteral();
 
   void parseExpression();
+
+  void parseComma();
+
+  void parseLogicalOr();
+
+  void parseLogicalAnd();
+
+  void parseLogicalComparison();
+
+  void parseComparison();
+
+  void parsePlusMinus();
+
+  void parseMulDiv();
+
+  void parseUnary();
+
+  void parseAtom();
 
   void parseIndex();
 

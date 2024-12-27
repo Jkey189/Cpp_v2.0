@@ -9,8 +9,6 @@ std::string typeToString(const my::TokenType& tokenType) {
       return "FLOAT_LITERAL";
     case my::TokenType::STRING_LITERAL:
       return "STRING_LITERAL";
-    case my::TokenType::BOOL_LITERAL:
-      return "BOOL_LITERAL";
     case my::TokenType::CHAR_LITERAL:
       return "CHAR_LITERAL";
     default:
@@ -261,56 +259,140 @@ void Parser::parseSwitch() {
 }
 
 void Parser::parseLiteral() {
-  if (currToken_.getType() ==my::TokenType::COMMENT_LITERAL) {
+  if (currToken_.getType() ==my::TokenType::COMMENT_LITERAL) { // comment
+    parseCommentLiteral();
+  } else if (currToken_.getType() ==my::TokenType::INTEGER_LITERAL) { // int
     parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::INTEGER_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::FLOAT_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::STRING_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::BOOL_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::CHAR_LITERAL) {
-    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::FLOAT_LITERAL) { // float
+    parseFloatLiteral();
+  } else if (currToken_.getType() ==my::TokenType::STRING_LITERAL) { // string
+    parseStringLiteral();
+  } else if (currToken_.getType() ==my::TokenType::CHAR_LITERAL) { // char
+    parseCharLiteral();
   } else {
-    throw std::runtime_error("Syntax error: invalid literal.");
+    throw std::runtime_error("Syntax error: invalid literal."); // error
   }
 }
 
 void Parser::parseCommentLiteral() {
-  if (currToken_.getType() != my::TokenType::COMMENT_LITERAL) {
+  if (currToken_.getType() != my::TokenType::COMMENT_LITERAL) { // comment error
     throw std::runtime_error("Syntax error: expected a comment literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseIntegerLiteral() {
-  if (currToken_.getType() != my::TokenType::INTEGER_LITERAL) {
+  if (currToken_.getType() != my::TokenType::INTEGER_LITERAL) { // int error
     throw std::runtime_error("Syntax error: expected an integer literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseFloatLiteral() {
-  if (currToken_.getType() != my::TokenType::FLOAT_LITERAL) {
+  if (currToken_.getType() != my::TokenType::FLOAT_LITERAL) { // float error
     throw std::runtime_error("Syntax error: expected a float literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseStringLiteral() {
-  if (currToken_.getType() != my::TokenType::STRING_LITERAL) {
+  if (currToken_.getType() != my::TokenType::STRING_LITERAL) { // string error
     throw std::runtime_error("Syntax error: expected a string literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseCharLiteral() {
-  if (currToken_.getType() != my::TokenType::CHAR_LITERAL) {
+  if (currToken_.getType() != my::TokenType::CHAR_LITERAL) { // char error
     throw std::runtime_error("Syntax error: expected a char literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
+}
+
+void Parser::parseExpression() { // general expression
+  parseComma();
+}
+
+void Parser::parseComma() { // exp1 `,` exp2 `,` ...
+  parseLogicalOr();
+  if (currToken_.getType() == my::TokenType::COMMA) {
+    parserAdvance();
+    parseLogicalOr();
+  }
+}
+
+void Parser::parseLogicalOr() { // ... `||` ...
+  parseLogicalAnd();
+  if (currToken_.getType() == my::TokenType::OR) {
+    parserAdvance();
+    parseLogicalAnd();
+  }
+}
+
+void Parser::parseLogicalAnd() { // ... `&&` ...
+  parseLogicalComparison();
+  if (currToken_.getType() == my::TokenType::AND) {
+    parserAdvance();
+    parseLogicalComparison();
+  }
+}
+
+
+void Parser::parseLogicalComparison() { // `==` /or/ `!=`
+  parseComparison();
+  if (currToken_.getType() == my::TokenType::EQ || currToken_.getType() == my::TokenType::NEQ) {
+    parserAdvance();
+    parseComparison();
+  }
+}
+
+void Parser::parseComparison() { // `>` /or/ `<`
+  parsePlusMinus();
+  if (currToken_.getType() == my::TokenType::GT || currToken_.getType() == my::TokenType::LT) {
+    parserAdvance();
+    parsePlusMinus();
+  }
+}
+
+void Parser::parsePlusMinus() { // `+` /or/ `-`
+  parseMulDiv();
+  if (currToken_.getType() == my::TokenType::PLUS || currToken_.getType() == my::TokenType::MINUS) {
+    parserAdvance();
+    parseMulDiv();
+  }
+}
+
+void Parser::parseMulDiv() { // `*` /or/ `/`
+  parseUnary();
+  if (currToken_.getType() == my::TokenType::MUL || currToken_.getType() == my::TokenType::DIV) {
+    parserAdvance();
+    parseUnary();
+  }
+}
+
+void Parser::parseUnary() { // `!` /or/ `-`...
+  if (currToken_.getType() == my::TokenType::NOT || currToken_.getType() == my::TokenType::MINUS) {
+    parserAdvance();
+  }
+  parseAtom();
+}
+
+void Parser::parseAtom() {
+  if (currToken_.getType() == my::TokenType::IDENTIFIER) { // `identifier`
+    parseIdentifier(); // `identifier`
+
+    if (currToken_.getType() == my::TokenType::LBRACKET) { // ... [`index`]
+      parserAdvance();
+      parseIndex();
+      expect(my::TokenType::RBRACKET);
+    }
+  } else if (currToken_.getType() == my::TokenType::LPAREN) { // `(` `expression` `)`
+    parserAdvance();
+    parseExpression();
+    expect(my::TokenType::RPAREN);
+  } else {
+    parseLiteral(); // `literal`
+  }
 }
 
 void Parser::parseIndex() {
@@ -323,4 +405,23 @@ void Parser::parseIndex() {
   } else {
     throw std::runtime_error("Syntax error: invalid array index '" + currToken_.getValue() + "'");
   }
+}
+
+void Parser::parseType() {
+  if (isType(currToken_)) {
+    if (currToken_.getType() == my::TokenType::ARRAY) {
+      parserAdvance();
+      expect(my::TokenType::LT);
+      parseType();
+      expect(my::TokenType::GT);
+    } else {
+      parserAdvance();
+    }
+  } else {
+    throw std::runtime_error("Syntax error: invalid type '" + currToken_.getValue() + "'");
+  }
+}
+
+void Parser::parseIdentifier() {
+  expect(my::TokenType::IDENTIFIER);
 }

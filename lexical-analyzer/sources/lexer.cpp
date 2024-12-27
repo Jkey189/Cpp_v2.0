@@ -145,6 +145,9 @@ std::string LexicalAnalyzer::getNumber() {
     }
     ++position_;
   }
+  if (isAlpha(program_[position_])) {
+    throw std::runtime_error("Lexer error: invalid write of number");
+  }
 
   return program_.substr(start, position_ - start);
 }

@@ -23,7 +23,7 @@ public:
                 << ", Column: " << token.getColumn() << ")" << std::endl;
     }*/
 
-    parserAdvance();
+    // parserAdvance();
   }
 
   /*explicit Parser(const LexicalAnalyzer& lexer) : currCount(0), lexer_(lexer), currToken_(lexer_.getLex()) {
@@ -53,32 +53,29 @@ public:
   }*/
 
   void program() {
-    while (currToken_.getType() != my::TokenType::END) {
-      std::cout << "Processing token in program: '" << currToken_.getValue()
-                << "' (Type: " << getTokenValue(currToken_.getType())
-                << ", Line: " << currToken_.getLine()
-                << ", Column: " << currToken_.getColumn() << ")" << std::endl;
-      parseDeclaration();
-    }
-  }
-
-  /*void program() {
-    parserAdvance();
     parseProgram();
-  }*/
+  }
 
   [[nodiscard]] LexicalAnalyzer getLexer() const { return lexer_; }
 
 
   void expect(const my::TokenType type) {
-    if (currToken_.getType() != type) { // make expected throw more informative
-      throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
-        "' (line: " +  std::to_string(currToken_.getLine()) +
-        ", column: " + std::to_string(currToken_.getColumn()) +
-        "), Expected: " + getTokenValue(type));
+    if (currToken_.getType() != type) {
+      throw std::runtime_error(
+      "Syntax error at token: '" + currToken_.getValue() +
+      "' (" + getTokenValue(currToken_.getType()) + "), Expected: " + getTokenValue(type)
+      );
     }
     parserAdvance();
   }
+
+  /*void expect(const my::TokenType type) {
+    if (currToken_.getType() != type) { // make expected throw more informative
+      throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
+        "', Expected: " + getTokenValue(type));
+    }
+    parserAdvance();
+  }*/
 
   void parserAdvance() {
     const auto& tokens = lexer_.getTokens(); // Получаем токены из лексера
@@ -91,10 +88,7 @@ public:
     }
 
     currToken_ = tokens[currCount++];
-    std::cout << "Advanced to token: '" << currToken_.getValue()
-              << "' (Type: " << getTokenValue(currToken_.getType())
-              << ", Line: " << currToken_.getLine()
-              << ", Column: " << currToken_.getColumn() << ")" << std::endl;
+    std::cout << "Advanced to token: '" << currToken_.getValue() << "'" << std::endl;
   }
 
   /*Token parserAdvance() {

@@ -98,7 +98,7 @@ int main() {
 
   // Выводим только что считанное содержимое для проверки
   std::cout << "Full source code content:" << std::endl;
-  std::cout << "``````````````````````````````cpp_v2.0``````````````````````````````" << std::endl;
+  std::cout << "````````````````````````````````Cppt````````````````````````````````" << std::endl;
   std::cout << sourceCode << std::endl;
   std::cout << "````````````````````````````````````````````````````````````````````" << std::endl;
 
@@ -123,16 +123,16 @@ int main() {
   std::cout << std::endl << std::endl << std::endl << std::endl;
   Parser parser(lexer);
 
-  parser.program();
-  std::cout << "Syntax analyzer has completed successfully!" << std::endl;
+  /*parser.program();
+  std::cout << "Syntax analyzer has completed successfully!" << std::endl;*/
 
-  /*try {
+  try {
     parser.program();
     std::cout << "Syntax analyzer has completed successfully!" << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "Parser's errors: " << e.what() << std::endl;
     return -4;
-  }*/
+  }
 
   /*if (std::filesystem::current_path("../assets/source_file.cppt") == "txt") {
     std::cout << "OK" << std::endl;
@@ -140,11 +140,26 @@ int main() {
     std::cout << "BAD" << std::endl;
   }*/
 
-  std::map<std::string, my::TokenType> symbolTable;
+  // std::map<std::string, my::TokenType> symbolTable;
+
   /*symbolTable.emplace("func", my::TokenType::IDENTIFIER);*/
-  TID tid(symbolTable);
-  SemanticAnalyzer semantic(parser, tid);
-  semantic.analyze();
+  try {
+    TID tid;
+    SemanticAnalyzer semanticAnalyzer(parser, tid);
+    semanticAnalyzer.analyze();
+
+    std::cout << "Semantic analysis completed successfully!" << std::endl;
+    // Генерация ПОЛИЗ
+    std::vector<std::string> rpn = semanticAnalyzer.generateRPN();
+    std::cout << "Generated RPN:" << std::endl;
+    for (const auto& token : rpn) {
+      std::cout << token << " ";
+    }
+    std::cout << std::endl;
+  } catch (const std::exception& e) {
+    std::cerr << "Error during semantic analysis: " << e.what() << std::endl;
+    return -1;
+  }
 
   return 0;
 }

@@ -3,6 +3,7 @@
 
 
 #include "../../includes/libraries.h"
+#include "../../global_functions/global_funcs.h"
 #include "tokens.h"
 #include "trie.h"
 
@@ -18,7 +19,11 @@ public:
   Token getLex();
   Token peek(size_t ind);
 
-  std::vector<Token> getTokens() { return tokenize(); }
+  std::vector<Token> getTokens() {
+    position_ = 0;
+    static std::vector<Token> tokens = tokenize();
+    return tokens;
+  }
 
 
 private:

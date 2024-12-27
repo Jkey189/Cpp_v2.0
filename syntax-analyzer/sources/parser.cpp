@@ -9,8 +9,6 @@ std::string typeToString(const my::TokenType& tokenType) {
       return "FLOAT_LITERAL";
     case my::TokenType::STRING_LITERAL:
       return "STRING_LITERAL";
-    case my::TokenType::BOOL_LITERAL:
-      return "BOOL_LITERAL";
     case my::TokenType::CHAR_LITERAL:
       return "CHAR_LITERAL";
     default:
@@ -28,11 +26,11 @@ void Parser::parseProgram() {
 void Parser::parseDeclaration() {
   if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "func") {
     parseFunction();
-  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+  } /*else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
     parseIdentifier();
     /*parseInitialization();
-    parseAssignment();*/
-  } else {
+    parseAssignment();#1#
+  } */else {
     parseInstruction();
   }
 }
@@ -71,8 +69,66 @@ void Parser::parseBlock() {
   expect(my::TokenType::RBRACE);
 }
 
+/*void Parser::parseInstruction() {
+  std::cout << "Parsing instruction: '" << currToken_.getValue() << "' (Type: "
+            << getTokenValue(currToken_.getType()) << ")" << std::endl;
+
+  if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "func") {
+
+  } else if (currToken_.getType() == my::TokenType::LBRACE) {
+    parseBlock();
+  } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cin") {
+    parseInput();
+  } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cout") {
+    parseOutput();
+  } else if (currToken_.getType() == my::TokenType::IF) {
+    parseConditional();
+  } else if (currToken_.getType() == my::TokenType::FOR || currToken_.getType() == my::TokenType::WHILE) {
+    parseLoop();
+  } else if (currToken_.getType() == my::TokenType::SWITCH) {
+    parseSwitch();
+  } else if (currToken_.getType() == my::TokenType::BREAK || currToken_.getType() == my::TokenType::CONTINUE) {
+    parserAdvance();
+    expect(my::TokenType::SEMICOLON);
+  } else if (currToken_.getType() == my::TokenType::RETURN) {
+    parserAdvance();
+    parseExpression();
+    expect(my::TokenType::SEMICOLON);
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    Token variableToken = currToken_;
+    if (lexer_.peek(currCount).getType() == my::TokenType::ASSIGN) {
+      parseAssignment();
+    } else {
+      parseExpression();
+    }
+  } else if (currToken_.getType() == my::TokenType::SEMICOLON) {
+    parserAdvance();
+  } else {
+    throw std::runtime_error("Syntax error: invalid instruction.");
+  }
+}*/
+
 void Parser::parseInstruction() {
-  if (currToken_.getType() == my::TokenType::LBRACE) { // { block's body }
+  /*if (currToken_.getType() == my::TokenType::LPAREN) {
+    parserAdvance();
+    parseExpression();
+    bool wasRparen = false;
+    if (currToken_.getType() == my::TokenType::RPAREN) {
+      wasRparen = true;
+      parserAdvance();
+    }
+    if (currToken_.getType() == my::TokenType::SEMICOLON && !wasRparen) {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+    if (currToken_.getType() == my::TokenType::SEMICOLON && !wasRparen) {
+      expect(my::TokenType::SEMICOLON);
+    }
+  } else */
+  if (isType(currToken_)) {
+    parseInitialization();
+    /*parserAdvance();
+    parseIdentifier();*/
+  } else if (currToken_.getType() == my::TokenType::LBRACE) { // { block's body }
     parseBlock();
   } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cin") {  // `cin` >> ...
     parseInput();
@@ -108,10 +164,10 @@ void Parser::parseInstruction() {
 
 void Parser::parseInput() {
   if (currToken_.getType() != my::TokenType::KEYWORD || currToken_.getValue() != "cin") { // `cin`
-    throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
-        "' (line: " +  std::to_string(currToken_.getLine()) +
-        ", column: " + std::to_string(currToken_.getColumn()) +
-        "), Expected: " + getTokenValue(currToken_.getType()));
+    throw std::runtime_error(
+      "Syntax error at token: '" + currToken_.getValue() + "'" +
+      "(" + getTokenValue(currToken_.getType()) + ")"
+      );
   }
   expect(my::TokenType::IN); // >>
   parseIdentifier();
@@ -126,16 +182,13 @@ void Parser::parseInput() {
 
 void Parser::parseOutput() {
   if (currToken_.getType() != my::TokenType::KEYWORD || currToken_.getValue() != "cout") { // `cout`
-    throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
-        "' (line: " +  std::to_string(currToken_.getLine()) +
-        ", column: " + std::to_string(currToken_.getColumn()) +
-        "), Expected: " + getTokenValue(currToken_.getType()));
+    throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() + "'");
   }
   expect(my::TokenType::OUT); // <<
   parseIdentifier();
 
-  while (currToken_.getType() == my::TokenType::OUT) {
-    parserAdvance();
+  while (currToken_.getType() != my::TokenType::SEMICOLON) {
+    expect(my::TokenType::OUT);
     parseIdentifier();
   }
 
@@ -188,10 +241,27 @@ void Parser::parseLoop() {
   }*/
 }
 
+/*
 void Parser::parseInitialization() {
-  if (!isType(currToken_)) { // check, is it real `type`
+  parseType(); // `type`
+  parseIdentifier(); // `identifier`
+
+  if (currToken_.getType() == my::TokenType::ASSIGN) { // Проверяем `=`
+    parserAdvance(); // `=`
+
+    // Вызов parseExpression для проверки выражения справа от `=`
+    parseExpression();
+  }
+
+  expect(my::TokenType::SEMICOLON); // Проверяем наличие `;` в конце
+}
+*/
+
+void Parser::parseInitialization() {
+  /*if (!isType(currToken_)) { // check, is it real `type`
     throw std::runtime_error("Syntax error: expected type in initialization.");
   }
+  */
 
   parseType(); // `type`
   parseIdentifier(); // `identifier`
@@ -214,6 +284,30 @@ void Parser::parseInitialization() {
 }
 
 void Parser::parseAssignment() {
+  parseIdentifier(); // Левый операнд
+
+  // Проверяем возможный доступ к элементам массива
+  while (currToken_.getType() != my::TokenType::ASSIGN) {
+    if (currToken_.getType() == my::TokenType::LBRACKET) {
+      parserAdvance();
+      parseIndex();
+      expect(my::TokenType::RBRACKET);
+    } else {
+      throw std::runtime_error("Syntax error: invalid token, Expected: RBRACKET `]`");
+    }
+  }
+
+  // Ожидаем оператор присваивания
+  expect(my::TokenType::ASSIGN); // `=`
+
+  // Разбираем выражение справа от '='
+  parseExpression();
+
+  // Заканчиваем инструкцию
+  expect(my::TokenType::SEMICOLON); // `;`
+}
+
+/*void Parser::parseAssignment() {
   parseIdentifier();
 
   while (currToken_.getType() != my::TokenType::ASSIGN) { // ... = <- эту "=" мы и ждем
@@ -229,7 +323,7 @@ void Parser::parseAssignment() {
   expect(my::TokenType::ASSIGN); // `=`
   parseExpression(); // = `expression`
   expect(my::TokenType::SEMICOLON); // `;`
-}
+}*/
 
 void Parser::parseStep() {
   parseExpression(); // `step` (for example: i = i + 1)
@@ -261,59 +355,190 @@ void Parser::parseSwitch() {
 }
 
 void Parser::parseLiteral() {
-  if (currToken_.getType() ==my::TokenType::COMMENT_LITERAL) {
+  if (currToken_.getType() ==my::TokenType::COMMENT_LITERAL) { // comment
+    parseCommentLiteral();
+  } else if (currToken_.getType() ==my::TokenType::INTEGER_LITERAL) { // int
     parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::INTEGER_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::FLOAT_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::STRING_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::BOOL_LITERAL) {
-    parseIntegerLiteral();
-  } else if (currToken_.getType() ==my::TokenType::CHAR_LITERAL) {
-    parseIntegerLiteral();
+  } else if (currToken_.getType() ==my::TokenType::FLOAT_LITERAL) { // float
+    parseFloatLiteral();
+  } else if (currToken_.getType() ==my::TokenType::STRING_LITERAL) { // string
+    parseStringLiteral();
+  } else if (currToken_.getType() ==my::TokenType::CHAR_LITERAL) { // char
+    parseCharLiteral();
   } else {
-    throw std::runtime_error("Syntax error: invalid literal.");
+    throw std::runtime_error("Syntax error: invalid literal."); // error
   }
 }
 
 void Parser::parseCommentLiteral() {
-  if (currToken_.getType() != my::TokenType::COMMENT_LITERAL) {
+  if (currToken_.getType() != my::TokenType::COMMENT_LITERAL) { // comment error
     throw std::runtime_error("Syntax error: expected a comment literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseIntegerLiteral() {
-  if (currToken_.getType() != my::TokenType::INTEGER_LITERAL) {
+  if (currToken_.getType() != my::TokenType::INTEGER_LITERAL) { // int error
     throw std::runtime_error("Syntax error: expected an integer literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseFloatLiteral() {
-  if (currToken_.getType() != my::TokenType::FLOAT_LITERAL) {
+  if (currToken_.getType() != my::TokenType::FLOAT_LITERAL) { // float error
     throw std::runtime_error("Syntax error: expected a float literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseStringLiteral() {
-  if (currToken_.getType() != my::TokenType::STRING_LITERAL) {
+  if (currToken_.getType() != my::TokenType::STRING_LITERAL) { // string error
     throw std::runtime_error("Syntax error: expected a string literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
 void Parser::parseCharLiteral() {
-  if (currToken_.getType() != my::TokenType::CHAR_LITERAL) {
+  if (currToken_.getType() != my::TokenType::CHAR_LITERAL) { // char error
     throw std::runtime_error("Syntax error: expected a char literal, got '" + currToken_.getValue() + "'");
   }
   parserAdvance();
 }
 
+void Parser::parseExpression() { // general expression
+  parseComma();
+}
+
+void Parser::parseComma() { // exp1 `,` exp2 `,` ...
+  parseLogicalOr();
+  if (currToken_.getType() == my::TokenType::COMMA) {
+    parserAdvance();
+    parseLogicalOr();
+  }
+}
+
+void Parser::parseLogicalOr() { // ... `||` ...
+  parseLogicalAnd();
+  if (currToken_.getType() == my::TokenType::OR) {
+    parserAdvance();
+    parseLogicalAnd();
+  }
+}
+
+void Parser::parseLogicalAnd() { // ... `&&` ...
+  parseLogicalComparison();
+  if (currToken_.getType() == my::TokenType::AND) {
+    parserAdvance();
+    parseLogicalComparison();
+  }
+}
+
+
+void Parser::parseLogicalComparison() { // `==` /or/ `!=`
+  parseComparison();
+  if (currToken_.getType() == my::TokenType::EQ || currToken_.getType() == my::TokenType::NEQ) {
+    parserAdvance();
+    parseComparison();
+  }
+}
+
+void Parser::parseComparison() { // `>` /or/ `<`
+  parsePlusMinus();
+  if (currToken_.getType() == my::TokenType::GT || currToken_.getType() == my::TokenType::LT) {
+    parserAdvance();
+    parsePlusMinus();
+  }
+}
+
+void Parser::parsePlusMinus() { // `+` /or/ `-`
+  parseMulDiv();
+  if (currToken_.getType() == my::TokenType::PLUS || currToken_.getType() == my::TokenType::MINUS) {
+    parserAdvance();
+    parseMulDiv();
+  }
+}
+
+void Parser::parseMulDiv() { // `*` /or/ `/`
+  parseUnary();
+  if (currToken_.getType() == my::TokenType::MUL || currToken_.getType() == my::TokenType::DIV) {
+    parserAdvance();
+    parseUnary();
+  }
+}
+
+void Parser::parseUnary() { // `!` /or/ `-`...
+  if (currToken_.getType() == my::TokenType::NOT || currToken_.getType() == my::TokenType::MINUS) {
+    parserAdvance();
+  }
+  parseAtom();
+}
+
+void Parser::parseAtom() {
+  if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    parseIdentifier();
+  } else if (currToken_.getType() == my::TokenType::LPAREN) {
+    parserAdvance();
+    parseExpression();
+    expect(my::TokenType::RPAREN);
+  } else {
+    parseLiteral();
+  }
+
+  /*if (currToken_.getType() == my::TokenType::IDENTIFIER) { // Обработка идентификатора
+    parseIdentifier();
+
+    // Индексирование массива
+    while (currToken_.getType() == my::TokenType::LBRACKET) {
+      parserAdvance(); // `[`
+      parseIndex();
+      expect(my::TokenType::RBRACKET); // `]`
+    }
+  } else if (currToken_.getType() == my::TokenType::LPAREN) { // Обработка открывающей скобки
+    parserAdvance(); // `(`
+
+    parseExpression(); // Рекурсивно обрабатываем выражение
+
+    if (currToken_.getType() != my::TokenType::RPAREN) {
+      throw std::runtime_error("Syntax error: expected ')' but got '" + currToken_.getValue() +
+        "' at line " + std::to_string(currToken_.getLine()) +
+        ", column " + std::to_string(currToken_.getColumn()) + ".");
+    }
+    parserAdvance(); // Закрывающая скобка `)`
+  } else {
+    parseLiteral(); // Обрабатываем литералы
+  }*/
+}
+
+/*void Parser::parseAtom() {
+  if (currToken_.getType() == my::TokenType::IDENTIFIER) { // `identifier`
+    parseIdentifier(); // `identifier`
+
+    if (currToken_.getType() == my::TokenType::LBRACKET) { // ... [`index`]
+      parserAdvance();
+      parseIndex();
+      expect(my::TokenType::RBRACKET);
+    }
+  } else if (currToken_.getType() == my::TokenType::LPAREN) { // `(` `expression` `)`
+    parserAdvance();
+    parseExpression();
+    expect(my::TokenType::RPAREN);
+  } else {
+    parseLiteral(); // `literal`
+  }
+}*/
+
 void Parser::parseIndex() {
+  // Индекс массива может быть либо числом, либо идентификатором
+  if (currToken_.getType() == my::TokenType::INTEGER_LITERAL) {
+    parseIntegerLiteral();
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    parseIdentifier();
+  } else {
+    throw std::runtime_error("Syntax error: invalid array index '" + currToken_.getValue() + "'");
+  }
+}
+
+/*void Parser::parseIndex() {
   parserAdvance();
 
   if (currToken_.getType() == my::TokenType::INTEGER_LITERAL) {
@@ -323,4 +548,23 @@ void Parser::parseIndex() {
   } else {
     throw std::runtime_error("Syntax error: invalid array index '" + currToken_.getValue() + "'");
   }
+}*/
+
+void Parser::parseType() {
+  if (isType(currToken_)) {
+    if (currToken_.getType() == my::TokenType::ARRAY) {
+      parserAdvance();
+      expect(my::TokenType::LT);
+      parseType();
+      expect(my::TokenType::GT);
+    } else {
+      parserAdvance();
+    }
+  } else {
+    throw std::runtime_error("Syntax error: invalid type '" + currToken_.getValue() + "'");
+  }
+}
+
+void Parser::parseIdentifier() {
+  expect(my::TokenType::IDENTIFIER);
 }

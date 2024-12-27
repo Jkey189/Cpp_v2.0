@@ -11,7 +11,7 @@ bool Trie::find(std::string& str) const {
     v = v->to[ch];
   }
 
-  return true;
+  return v->isTerm;
 }
 
 void Trie::insert(std::string& str) const {

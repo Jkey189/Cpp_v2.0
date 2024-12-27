@@ -70,7 +70,21 @@ void Parser::parseBlock() {
 }
 
 void Parser::parseInstruction() {
-  if (currToken_.getType() == my::TokenType::LBRACE) { // { block's body }
+  if (currToken_.getType() == my::TokenType::LPAREN) {
+    parserAdvance();
+    parseExpression();
+    bool wasRparen = false;
+    if (currToken_.getType() == my::TokenType::RPAREN) {
+      wasRparen = true;
+      parserAdvance();
+    }
+    if (currToken_.getType() == my::TokenType::SEMICOLON && !wasRparen) {
+      throw std::runtime_error("Syntax error: unexpected token");
+    }
+    if (currToken_.getType() == my::TokenType::SEMICOLON && !wasRparen) {
+      expect(my::TokenType::SEMICOLON);
+    }
+  } else if (currToken_.getType() == my::TokenType::LBRACE) { // { block's body }
     parseBlock();
   } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cin") {  // `cin` >> ...
     parseInput();
@@ -132,8 +146,8 @@ void Parser::parseOutput() {
   expect(my::TokenType::OUT); // <<
   parseIdentifier();
 
-  while (currToken_.getType() == my::TokenType::OUT) {
-    parserAdvance();
+  while (currToken_.getType() != my::TokenType::SEMICOLON) {
+    expect(my::TokenType::OUT);
     parseIdentifier();
   }
 
@@ -187,6 +201,20 @@ void Parser::parseLoop() {
 }
 
 void Parser::parseInitialization() {
+  parseType(); // `type`
+  parseIdentifier(); // `identifier`
+
+  if (currToken_.getType() == my::TokenType::ASSIGN) { // Проверяем `=`
+    parserAdvance(); // `=`
+
+    // Вызов parseExpression для проверки выражения справа от `=`
+    parseExpression();
+  }
+
+  expect(my::TokenType::SEMICOLON); // Проверяем наличие `;` в конце
+}
+
+/*void Parser::parseInitialization() {
   if (!isType(currToken_)) { // check, is it real `type`
     throw std::runtime_error("Syntax error: expected type in initialization.");
   }
@@ -209,7 +237,7 @@ void Parser::parseInitialization() {
   } else {
     throw std::runtime_error("Syntax error: invalid value in initialization.");
   }
-}
+}*/
 
 void Parser::parseAssignment() {
   parseIdentifier();
@@ -378,6 +406,32 @@ void Parser::parseUnary() { // `!` /or/ `-`...
 }
 
 void Parser::parseAtom() {
+  if (currToken_.getType() == my::TokenType::IDENTIFIER) { // Обработка идентификатора
+    parseIdentifier();
+
+    // Индексирование массива
+    while (currToken_.getType() == my::TokenType::LBRACKET) {
+      parserAdvance(); // `[`
+      parseIndex();
+      expect(my::TokenType::RBRACKET); // `]`
+    }
+  } else if (currToken_.getType() == my::TokenType::LPAREN) { // Обработка открывающей скобки
+    parserAdvance(); // `(`
+
+    parseExpression(); // Рекурсивно обрабатываем выражение
+
+    if (currToken_.getType() != my::TokenType::RPAREN) {
+      throw std::runtime_error("Syntax error: expected ')' but got '" + currToken_.getValue() +
+        "' at line " + std::to_string(currToken_.getLine()) +
+        ", column " + std::to_string(currToken_.getColumn()) + ".");
+    }
+    parserAdvance(); // Закрывающая скобка `)`
+  } else {
+    parseLiteral(); // Обрабатываем литералы
+  }
+}
+
+/*void Parser::parseAtom() {
   if (currToken_.getType() == my::TokenType::IDENTIFIER) { // `identifier`
     parseIdentifier(); // `identifier`
 
@@ -393,7 +447,7 @@ void Parser::parseAtom() {
   } else {
     parseLiteral(); // `literal`
   }
-}
+}*/
 
 void Parser::parseIndex() {
   parserAdvance();

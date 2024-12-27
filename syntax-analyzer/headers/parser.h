@@ -18,7 +18,7 @@ public:
 
   void program() {
     parserAdvance();
-    /*parseProgram();*/
+    parseProgram();
   }
 
   Token parserAdvance() {

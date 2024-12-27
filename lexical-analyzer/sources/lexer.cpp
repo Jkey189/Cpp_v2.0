@@ -85,6 +85,13 @@ Token LexicalAnalyzer::getLex() {
   return getTokens().at(0);
 }
 
+/*Token LexicalAnalyzer::peek(const size_t ind) {
+  if (const auto& tokens = getTokens(); ind < tokens.size()) {
+    return tokens[ind];
+  }
+  return Token(my::TokenType::END, "");
+}*/
+
 Token LexicalAnalyzer::peek(const size_t ind) {
   return ind < getTokens().size() ? getTokens()[ind + 1] :
   (getTokens()[ind + 1].getType() == my::TokenType::END) ? getTokens()[ind + 1] :

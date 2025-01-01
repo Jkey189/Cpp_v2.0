@@ -1,11 +1,3 @@
-if
-else
-switch
-case
-continue
-break
-for
-while
 true
 false
 const

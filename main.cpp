@@ -19,16 +19,16 @@ void printTokens(const std::vector<Token>& tokens) {
   /*for (auto& currToken : tokens) {
     std::cout << "Token value: " << currToken.getValue() << std::endl;
     std::cout << "Token type: " << getTokenValue(currToken.getType()) << std::endl;
-    /*std::cout << "Token position: line: " << currToken.getLine() << std::endl;
-    std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;#1#
+    std::cout << "Token position: line: " << currToken.getLine() << std::endl;
+    std::cout << "Token position: column: " << currToken.getColumn() << std::endl << std::endl;
     std::cout << std::endl;
-    /*std::this_thread::sleep_for(std::chrono::milliseconds(500));#1#
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }*/
 }
 
 
 int main() {
-  std::filesystem::__cxx11::path filePath = "../assets/source_file.cppt";
+  std::filesystem::path filePath = "../assets/source_file.cppt";
   std::cout << "File extension: " << filePath.extension() << std::endl;
 
   // Пути к файлам с кодом и keywords

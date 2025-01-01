@@ -35,7 +35,7 @@ public:
           << ", Column: " << currToken_.getColumn() << ")" << std::endl;
 
 
-    /*const auto tokens = lexer_.getTokens();
+    const auto tokens = lexer_.getTokens();
 
     std::cout << "Tokens received from lexer:" << std::endl;
     for (const auto &token: tokens) {

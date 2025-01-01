@@ -41,7 +41,25 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
         tokens.emplace_back(my::TokenType::VOID, word);
       } else if (word == "string") {
         tokens.emplace_back(my::TokenType::STRING, word);
-      }  else if (word == "array") {
+      } else if (word == "if") {
+        tokens.emplace_back(my::TokenType::IF, word);
+      } else if (word == "else") {
+        tokens.emplace_back(my::TokenType::ELSE, word);
+      } else if (word == "switch") {
+        tokens.emplace_back(my::TokenType::SWITCH, word);
+      } else if (word == "case") {
+        tokens.emplace_back(my::TokenType::CASE, word);
+      } else if (word == "default") {
+        tokens.emplace_back(my::TokenType::DEFAULT, word);
+      } else if (word == "break") {
+        tokens.emplace_back(my::TokenType::BREAK, word);
+      } else if (word == "continue") {
+        tokens.emplace_back(my::TokenType::CONTINUE, word);
+      } else if (word == "for") {
+        tokens.emplace_back(my::TokenType::FOR, word);
+      } else if (word == "while") {
+        tokens.emplace_back(my::TokenType::WHILE, word);
+      } else if (word == "array") {
         tokens.emplace_back(my::TokenType::ARRAY, word);
       } else if (keywords_.find(word) && isKeyword(word)) {
         tokens.emplace_back(my::TokenType::KEYWORD, word);

@@ -8,7 +8,7 @@
 class Trie {
   struct Word {
     std::map<char, Word*> to;
-    __int64 termCount = 0;
+    int64_t termCount = 0;
     bool isTerm = false;
   };
 

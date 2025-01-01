@@ -30,7 +30,8 @@ void Parser::parseDeclaration() {
     parseIdentifier();
     /*parseInitialization();
     parseAssignment();#1#
-  } */else {
+  } */
+  else {
     parseInstruction();
   }
 }
@@ -212,6 +213,7 @@ void Parser::parseLoop() {
   if (currToken_.getType() == my::TokenType::FOR) { // for (`initialization`; `condition`; `step`) ...
     parserAdvance(); // for
     expect(my::TokenType::LPAREN); // (
+    parserAdvance();
 
     // condition
     if (isType(currToken_)) { // `type`
@@ -264,6 +266,7 @@ void Parser::parseInitialization() {
   */
 
   parseType(); // `type`
+  parserAdvance();
   parseIdentifier(); // `identifier`
 
   if (currToken_.getType() != my::TokenType::ASSIGN) { // it must be '='

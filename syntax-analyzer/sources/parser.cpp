@@ -52,7 +52,7 @@ void Parser::parseFunction() {
 void Parser::parseParameters() {
   parseParameter();
   while (currToken_.getType() == my::TokenType::COMMA) {
-    parserAdvance(); // ,
+    advance(); // ,
     parseParameter(); // next parameter
   }
 }
@@ -127,6 +127,7 @@ void Parser::parseInstruction() {
   } else */
   if (isType(currToken_)) {
     parseInitialization();
+    advance();
     /*parserAdvance();
     parseIdentifier();*/
   } else if (currToken_.getType() == my::TokenType::LBRACE) { // { block's body }
@@ -144,10 +145,10 @@ void Parser::parseInstruction() {
     parseSwitch();
   } else if (currToken_.getType() == my::TokenType::BREAK ||
     currToken_.getType() == my::TokenType::CONTINUE) { // `break` /or/ `continue`
-    parserAdvance();
+    advance();
     expect(my::TokenType::SEMICOLON);
   } else if (currToken_.getType() == my::TokenType::RETURN) { // `return`
-    parserAdvance();
+    advance();
     parseExpression();
     expect(my::TokenType::SEMICOLON);
   } else if (currToken_.getType() == my::TokenType::IDENTIFIER) { // `identifier`
@@ -157,7 +158,7 @@ void Parser::parseInstruction() {
       parseExpression();
     }
   } else if (currToken_.getType() == my::TokenType::SEMICOLON) { // `;`
-    parserAdvance();
+    advance();
   } else {
     throw std::runtime_error("Syntax error: invalid instruction.");
   }
@@ -174,7 +175,7 @@ void Parser::parseInput() {
   parseIdentifier();
 
   while (currToken_.getType() == my::TokenType::IN) {
-    parserAdvance();
+    advance();
     parseIdentifier();
   }
 
@@ -204,16 +205,16 @@ void Parser::parseConditional() {
   parseBlock();
 
   if (currToken_.getType() == my::TokenType::ELSE) {
-    parserAdvance();
+    advance();
     parseBlock();
   }
 }
 
 void Parser::parseLoop() {
   if (currToken_.getType() == my::TokenType::FOR) { // for (`initialization`; `condition`; `step`) ...
-    parserAdvance(); // for
+    advance(); // for
     expect(my::TokenType::LPAREN); // (
-    parserAdvance();
+    advance();
 
     // condition
     if (isType(currToken_)) { // `type`
@@ -232,7 +233,7 @@ void Parser::parseLoop() {
 
     parseBlock(); // { loop's `for` body }
   } else if (currToken_.getType() == my::TokenType::WHILE) {
-    parserAdvance(); // while
+    advance(); // while
 
     expect(my::TokenType::LPAREN); // (
     parseExpression(); // condition
@@ -259,15 +260,15 @@ void Parser::parseInitialization() {
 }
 */
 
-void Parser::parseInitialization() {
+/*void Parser::parseInitialization() {
   parseType(); // `type`
-  parserAdvance();
+  advance();
   parseIdentifier(); // `identifier`
 
   if (currToken_.getType() == my::TokenType::ASSIGN) {
-    parserAdvance(); // `=`
+    advance(); // `=`
     if (currToken_.getType() == my::TokenType::IDENTIFIER) {
-      parserAdvance(); // = `identifier` ;
+      advance(); // = `identifier` ;
     }
     parseLiteral(); // = `literal` ;
   } else if (currToken_.getType() != my::TokenType::SEMICOLON) {
@@ -299,7 +300,35 @@ void Parser::parseInitialization() {
     parseExpression();
   } else {
     throw std::runtime_error("Syntax error: invalid value in initialization.");
-  }*/
+  }#1#
+}*/
+
+void Parser::parseInitialization() {
+  parseType(); // `type`
+  advance();
+
+  // Ожидаем идентификатор переменной.
+  if (currToken_.getType() != my::TokenType::IDENTIFIER) {
+    throw std::runtime_error("Syntax error at token: '" + currToken_.getValue() +
+                             "', Expected: IDENTIFIER");
+  }
+
+  advance(); // Переходим к следующему токену.
+
+  // Проверяем наличие символа '='.
+  if (currToken_.getType() == my::TokenType::ASSIGN) {
+    advance(); // Переходим к следующему токену.
+
+    // Парсим выражение (литерал или идентификатор).
+    parseExpression();
+  }
+
+  // Завершаем обработку инициализации.
+  if (currToken_.getType() != my::TokenType::SEMICOLON) {
+    throw std::runtime_error("Expected ';' after initialization.");
+  }
+
+  advance(); // Пропускаем ';'.
 }
 
 void Parser::parseAssignment() {
@@ -308,7 +337,7 @@ void Parser::parseAssignment() {
   // Проверяем возможный доступ к элементам массива
   while (currToken_.getType() != my::TokenType::ASSIGN) {
     if (currToken_.getType() == my::TokenType::LBRACKET) {
-      parserAdvance();
+      advance();
       parseIndex();
       expect(my::TokenType::RBRACKET);
     } else {
@@ -358,14 +387,14 @@ void Parser::parseSwitch() {
   expect(my::TokenType::LBRACE); // `{`
 
   while (currToken_.getType() == my::TokenType::CASE) { // `case` ...
-    parserAdvance(); // `case`
+    advance(); // `case`
     parseLiteral(); // case `literal`
     expect(my::TokenType::COLON); // `:`
     parseBlock(); // case's body
   }
 
   if (currToken_.getType() == my::TokenType::DEFAULT) { // `default` ...
-    parserAdvance(); // `default`
+    advance(); // `default`
     parseLiteral(); // default 'literal'
     expect(my::TokenType::COLON); // `:`
     parseBlock(); // default's block
@@ -394,35 +423,35 @@ void Parser::parseCommentLiteral() {
   if (currToken_.getType() != my::TokenType::COMMENT_LITERAL) { // comment error
     throw std::runtime_error("Syntax error: expected a comment literal, got '" + currToken_.getValue() + "'");
   }
-  parserAdvance();
+  advance();
 }
 
 void Parser::parseIntegerLiteral() {
   if (currToken_.getType() != my::TokenType::INTEGER_LITERAL) { // int error
     throw std::runtime_error("Syntax error: expected an integer literal, got '" + currToken_.getValue() + "'");
   }
-  parserAdvance();
+  advance();
 }
 
 void Parser::parseFloatLiteral() {
   if (currToken_.getType() != my::TokenType::FLOAT_LITERAL) { // float error
     throw std::runtime_error("Syntax error: expected a float literal, got '" + currToken_.getValue() + "'");
   }
-  parserAdvance();
+  advance();
 }
 
 void Parser::parseStringLiteral() {
   if (currToken_.getType() != my::TokenType::STRING_LITERAL) { // string error
     throw std::runtime_error("Syntax error: expected a string literal, got '" + currToken_.getValue() + "'");
   }
-  parserAdvance();
+  advance();
 }
 
 void Parser::parseCharLiteral() {
   if (currToken_.getType() != my::TokenType::CHAR_LITERAL) { // char error
     throw std::runtime_error("Syntax error: expected a char literal, got '" + currToken_.getValue() + "'");
   }
-  parserAdvance();
+  advance();
 }
 
 void Parser::parseExpression() { // general expression
@@ -432,7 +461,7 @@ void Parser::parseExpression() { // general expression
 void Parser::parseComma() { // exp1 `,` exp2 `,` ...
   parseLogicalOr();
   if (currToken_.getType() == my::TokenType::COMMA) {
-    parserAdvance();
+    advance();
     parseLogicalOr();
   }
 }
@@ -440,7 +469,7 @@ void Parser::parseComma() { // exp1 `,` exp2 `,` ...
 void Parser::parseLogicalOr() { // ... `||` ...
   parseLogicalAnd();
   if (currToken_.getType() == my::TokenType::OR) {
-    parserAdvance();
+    advance();
     parseLogicalAnd();
   }
 }
@@ -448,7 +477,7 @@ void Parser::parseLogicalOr() { // ... `||` ...
 void Parser::parseLogicalAnd() { // ... `&&` ...
   parseLogicalComparison();
   if (currToken_.getType() == my::TokenType::AND) {
-    parserAdvance();
+    advance();
     parseLogicalComparison();
   }
 }
@@ -457,7 +486,7 @@ void Parser::parseLogicalAnd() { // ... `&&` ...
 void Parser::parseLogicalComparison() { // `==` /or/ `!=`
   parseComparison();
   if (currToken_.getType() == my::TokenType::EQ || currToken_.getType() == my::TokenType::NEQ) {
-    parserAdvance();
+    advance();
     parseComparison();
   }
 }
@@ -465,7 +494,7 @@ void Parser::parseLogicalComparison() { // `==` /or/ `!=`
 void Parser::parseComparison() { // `>` /or/ `<`
   parsePlusMinus();
   if (currToken_.getType() == my::TokenType::GT || currToken_.getType() == my::TokenType::LT) {
-    parserAdvance();
+    advance();
     parsePlusMinus();
   }
 }
@@ -473,7 +502,7 @@ void Parser::parseComparison() { // `>` /or/ `<`
 void Parser::parsePlusMinus() { // `+` /or/ `-`
   parseMulDiv();
   if (currToken_.getType() == my::TokenType::PLUS || currToken_.getType() == my::TokenType::MINUS) {
-    parserAdvance();
+    advance();
     parseMulDiv();
   }
 }
@@ -481,14 +510,14 @@ void Parser::parsePlusMinus() { // `+` /or/ `-`
 void Parser::parseMulDiv() { // `*` /or/ `/`
   parseUnary();
   if (currToken_.getType() == my::TokenType::MUL || currToken_.getType() == my::TokenType::DIV) {
-    parserAdvance();
+    advance();
     parseUnary();
   }
 }
 
 void Parser::parseUnary() { // `!` /or/ `-`...
   if (currToken_.getType() == my::TokenType::NOT || currToken_.getType() == my::TokenType::MINUS) {
-    parserAdvance();
+    advance();
   }
   parseAtom();
 }
@@ -497,7 +526,7 @@ void Parser::parseAtom() {
   if (currToken_.getType() == my::TokenType::IDENTIFIER) {
     parseIdentifier();
   } else if (currToken_.getType() == my::TokenType::LPAREN) {
-    parserAdvance();
+    advance();
     parseExpression();
     expect(my::TokenType::RPAREN);
   } else {
@@ -573,12 +602,12 @@ void Parser::parseIndex() {
 void Parser::parseType() {
   if (isType(currToken_)) {
     if (currToken_.getType() == my::TokenType::ARRAY) {
-      parserAdvance();
+      advance();
       expect(my::TokenType::LT);
       parseType();
       expect(my::TokenType::GT);
     } else {
-      parserAdvance();
+      advance();
     }
   } else {
     throw std::runtime_error("Syntax error: invalid type '" + currToken_.getValue() + "'");

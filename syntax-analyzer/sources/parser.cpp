@@ -260,10 +260,26 @@ void Parser::parseInitialization() {
 */
 
 void Parser::parseInitialization() {
+  parseType(); // `type`
+  parserAdvance();
+  parseIdentifier(); // `identifier`
+
+  if (currToken_.getType() == my::TokenType::ASSIGN) {
+    parserAdvance(); // `=`
+    if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+      parserAdvance(); // = `identifier` ;
+    }
+    parseLiteral(); // = `literal` ;
+  } else if (currToken_.getType() != my::TokenType::SEMICOLON) {
+    throw std::runtime_error(
+      "Syntax error at token: '" + currToken_.getValue() +
+      "' (" + getTokenValue(currToken_.getType()) + "), Expected: " + getTokenValue(my::TokenType::SEMICOLON)
+      ); // not `;`
+  }
+
   /*if (!isType(currToken_)) { // check, is it real `type`
     throw std::runtime_error("Syntax error: expected type in initialization.");
   }
-  */
 
   parseType(); // `type`
   parserAdvance();
@@ -283,7 +299,7 @@ void Parser::parseInitialization() {
     parseExpression();
   } else {
     throw std::runtime_error("Syntax error: invalid value in initialization.");
-  }
+  }*/
 }
 
 void Parser::parseAssignment() {
@@ -329,7 +345,8 @@ void Parser::parseAssignment() {
 }*/
 
 void Parser::parseStep() {
-  parseExpression(); // `step` (for example: i = i + 1)
+  // parseExpression(); // `step` (for example: i = i + 1)
+  parseAssignment();
 }
 
 void Parser::parseSwitch() {

@@ -11,19 +11,19 @@ void SemanticAnalyzer::analyze() {
         checkVariable(token);
       }
     }
-    parser_.parserAdvance();
+    parser_.advance();
   }
 }
 
 void SemanticAnalyzer::checkFunction(const Token& token) const {
-  parser_.parserAdvance(); // Пропускаем `func`
+  parser_.advance(); // Пропускаем `func`
 
   // Проверяем возвращаемый тип
   const Token typeToken = parser_.getCurrToken();
   if (!parser_.isType(typeToken)) {
     throw std::runtime_error("Semantic error: invalid return type '" + typeToken.getValue() + "'.");
   }
-  parser_.parserAdvance();
+  parser_.advance();
 
   // Проверяем имя функции
   const Token nameToken = parser_.getCurrToken();
@@ -31,12 +31,12 @@ void SemanticAnalyzer::checkFunction(const Token& token) const {
     throw std::runtime_error("Semantic error: function name '" + nameToken.getValue() + "' is already used.");
   }
   tid_.add(nameToken.getValue(), typeToken.getType());
-  parser_.parserAdvance();
+  parser_.advance();
 
   // Пропускаем параметры функции
   parser_.expect(my::TokenType::LPAREN);
   while (parser_.getCurrToken().getType() != my::TokenType::RPAREN) {
-    parser_.parserAdvance();
+    parser_.advance();
   }
   parser_.expect(my::TokenType::RPAREN);
 }
@@ -51,7 +51,7 @@ void SemanticAnalyzer::checkVariable(const Token& token) {
 
   // Проверяем, если это часть присваивания, совпадают ли типы lvalue и rvalue
   if (parser_.getCurrToken().getType() == my::TokenType::ASSIGN) {
-    parser_.parserAdvance(); // Пропускаем '='
+    parser_.advance(); // Пропускаем '='
     Token nextToken = parser_.getCurrToken();
 
     // Получаем тип переменной (lvalue)
@@ -88,7 +88,7 @@ void SemanticAnalyzer::checkVariable(const Token& token) {
 
 void SemanticAnalyzer::checkAssignment(const Token& token) {
   checkVariable(token);
-  parser_.parserAdvance(); // Пропускаем идентификатор
+  parser_.advance(); // Пропускаем идентификатор
   parser_.expect(my::TokenType::ASSIGN);
 
   // Проверка типа переменной и значения
@@ -98,7 +98,7 @@ void SemanticAnalyzer::checkAssignment(const Token& token) {
     throw std::runtime_error("Semantic error: type mismatch for variable '" + token.getValue() +
       "' (expected: " + getTokenValue(variableType) + ", got: " + getTokenValue(valueToken.getType()) + ").");
   }
-  parser_.parserAdvance();
+  parser_.advance();
 }
 
 void SemanticAnalyzer::checkExpression(const Token& token) {
@@ -174,7 +174,7 @@ void SemanticAnalyzer::checkExpression(const Token& token) {
                                  ", column " + std::to_string(currToken.getColumn()) +
                                  ". Expected an operator.");
       }
-      parser_.parserAdvance(); // Пропускаем '('
+      parser_.advance(); // Пропускаем '('
       checkExpression(currToken); // Рекурсивно проверяем содержимое скобок
       if (parser_.getCurrToken().getType() != my::TokenType::RPAREN) {
         throw std::runtime_error("Semantic error: missing closing ')' at line " +
@@ -196,7 +196,7 @@ void SemanticAnalyzer::checkExpression(const Token& token) {
     }
 
     // Продвигаемся к следующему токену
-    parser_.parserAdvance();
+    parser_.advance();
   }
 
   // Если в конце выражения ожидается операнд, но мы достигли конца - ошибка
@@ -222,7 +222,7 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
         currToken.getType() == my::TokenType::STRING_LITERAL ||
         currToken.getType() == my::TokenType::CHAR_LITERAL) {
       output.push_back(currToken.getValue());
-      parser_.parserAdvance();
+      parser_.advance();
     }
 
     // Если это оператор
@@ -235,13 +235,13 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
         operators.pop();
       }
       operators.push(currToken.getValue());
-      parser_.parserAdvance();
+      parser_.advance();
     }
 
     // Если это открывающая скобка
     else if (currToken.getType() == my::TokenType::LPAREN) {
       operators.push(currToken.getValue());
-      parser_.parserAdvance();
+      parser_.advance();
     }
 
     // Если это закрывающая скобка
@@ -254,7 +254,7 @@ std::vector<std::string> SemanticAnalyzer::generateRPN() {
         throw std::runtime_error("Semantic error: mismatched parentheses.");
       }
       operators.pop(); // Убираем '(' из стека
-      parser_.parserAdvance();
+      parser_.advance();
     }
 
     // Любой другой случай - ошибка

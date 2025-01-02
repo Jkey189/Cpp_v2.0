@@ -66,7 +66,7 @@ public:
       "' (" + getTokenValue(currToken_.getType()) + "), Expected: " + getTokenValue(type)
       );
     }
-    parserAdvance();
+    advance();
   }
 
   /*void expect(const my::TokenType type) {
@@ -77,7 +77,7 @@ public:
     parserAdvance();
   }*/
 
-  void parserAdvance() {
+  void advance() {
     const auto& tokens = lexer_.getTokens(); // Получаем токены из лексера
     if (tokens.empty()) {
       throw std::runtime_error("Parser error: no tokens received from lexer.");

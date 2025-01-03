@@ -1,9 +1,80 @@
-func int main() {
-    int a = 5;
-    float b = "pizdec";
-    string str = "hello";
-    a = a + 2;
-    b = b / 1.5;
-    str = str + " world";
-    cout << a << " " << b << " " << str;
+func int function(int a, int b) {
+  int g = -5;
+
+  for (int i = 0;;) {
+
+    char x = 'h';
+    cin >> x;
+
+    while () {
+
+      int y;
+      cout << y;
+
+    }
+  }
+
+  while () {
+
+    float y = 4.5;
+    cout << y;
+
+  }
+
+  switch () {
+
+    case 'c':
+      int y;
+      float x = 5.5;
+      break;
+
+    case "string":
+      int y;
+      float x = 5.5;
+      break;
+
+    case 5:
+      switch () {
+
+        case 5:
+          int y;
+          float x = 5.5;
+          break;
+
+        case 4:
+          int y;
+          float x = 5.5;
+          break;
+
+        default:
+          cout << g;
+
+      }
+      break;
+
+    default:
+      cout << g;
+
+  }
+
+  if () {
+
+    for (int j = 0;;) {
+
+      string x = "bruh";
+      cin >> x;
+
+      while () {
+
+        char y = 'g';
+        cout << y;
+
+      }
+    }
+
+    cout << a;
+  }
+
+  cin >> a >> b >> c;
+  cout << a << b << c;
 }

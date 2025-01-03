@@ -63,11 +63,12 @@ public:
     if (currToken_.getType() != type) {
       throw std::runtime_error(
       "Syntax error at token: '" + currToken_.getValue() +
-      "' (" + getTokenValue(currToken_.getType()) + "), Expected: " + getTokenValue(type)
+      "' (" + getTokenValue(currToken_.getType()) + "), Expected: " + getTokenValue(type) +
+      " || expect()"
       );
     }
-    advance();
-  }
+    advance(); // probably useless
+}
 
   /*void expect(const my::TokenType type) {
     if (currToken_.getType() != type) { // make expected throw more informative
@@ -80,11 +81,11 @@ public:
   void advance() {
     const auto& tokens = lexer_.getTokens(); // Получаем токены из лексера
     if (tokens.empty()) {
-      throw std::runtime_error("Parser error: no tokens received from lexer.");
+      throw std::runtime_error("Parser error: no tokens received from lexer. || advance().1");
     }
 
     if (currCount >= tokens.size()) {
-      throw std::runtime_error("Parser error: unexpected end of input.");
+      throw std::runtime_error("Parser error: unexpected end of input. || advance().2");
     }
 
     currToken_ = tokens[currCount++];
@@ -187,7 +188,9 @@ private:
 
   void parseLiteral();
 
-  void parseCommentLiteral();
+  // maybe useless literal's methods...
+
+  /*void parseCommentLiteral();
 
   void parseIntegerLiteral();
 
@@ -195,7 +198,7 @@ private:
 
   void parseStringLiteral();
 
-  void parseCharLiteral();
+  void parseCharLiteral();*/
 
   void parseExpression();
 
@@ -205,9 +208,9 @@ private:
 
   void parseLogicalAnd();
 
-  void parseLogicalComparison();
+  void parseEqualityOperators();
 
-  void parseComparison();
+  void parseRelationalOperators();
 
   void parsePlusMinus();
 

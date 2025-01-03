@@ -17,9 +17,8 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
 
     if (isDigit(currChar)) {
       // std::cout << "We've found number!" << std::endl; // Для проверки
-      std::string number = getNumber();
 
-      if (number.find('.') != std::string::npos) {
+      if (std::string number = getNumber(); number.find('.') != std::string::npos) {
         // std::cout << "It's an integer!" << std::endl << std::endl; // Для проверки
         tokens.emplace_back(my::TokenType::FLOAT_LITERAL, number);
       } else {
@@ -73,7 +72,22 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
       }
     } else if (isOperator(op)) {
       // std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
-      tokens.emplace_back(tokenizeOperator(op));
+      if ((program_[position_] == '-' || program_[position_] == '+')
+        && position_ < program_.size() && isDigit(program_[position_ + 1])) {
+        std::string emplaceNumber = "-";
+        ++position_;
+
+        std::string number = getNumber();
+        emplaceNumber += number;
+
+        if (number.find('.') != std::string::npos) {
+          tokens.emplace_back(my::TokenType::FLOAT_LITERAL, emplaceNumber);
+        } else {
+          tokens.emplace_back(my::TokenType::INTEGER_LITERAL, emplaceNumber);
+        }
+      } else {
+        tokens.emplace_back(tokenizeOperator(op));
+      }
     } else if (isBracket(currChar)) {
       // std::cout << "We've found bracket!" << std::endl << std::endl; // Для проверки
       tokens.emplace_back(tokenizeBracket(currChar));

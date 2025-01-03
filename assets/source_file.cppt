@@ -1,12 +1,12 @@
 func int function(int a, int b) {
   int g = -5;
 
-  for (int i = 0;;) {
+  for (int i = 0; i < n;) {
 
     char x = 'h';
     cin >> x;
 
-    while () {
+    while (x * 2 != 0) {
 
       int y;
       cout << y;
@@ -14,14 +14,14 @@ func int function(int a, int b) {
     }
   }
 
-  while () {
+  while (y - x > -10.5) {
 
     float y = 4.5;
     cout << y;
 
   }
 
-  switch () {
+  switch (a) {
 
     case 'c':
       int y;
@@ -34,7 +34,7 @@ func int function(int a, int b) {
       break;
 
     case 5:
-      switch () {
+      switch (b) {
 
         case 5:
           int y;
@@ -57,14 +57,14 @@ func int function(int a, int b) {
 
   }
 
-  if () {
+  if (isOk) {
 
-    for (int j = 0;;) {
+    for (int j = 0; j < n;) {
 
       string x = "bruh";
       cin >> x;
 
-      while () {
+      while (true) {
 
         char y = 'g';
         cout << y;

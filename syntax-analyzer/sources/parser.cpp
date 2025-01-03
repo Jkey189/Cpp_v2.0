@@ -99,7 +99,6 @@ void Parser::parseInstruction() {
   } else if (currToken_.getType() == my::TokenType::FOR || currToken_.getType() == my::TokenType::WHILE) {
     parseLoop();
   } else if (currToken_.getType() == my::TokenType::SWITCH) {
-    // advance();
     parseSwitch();
   } else if (currToken_.getType() == my::TokenType::BREAK || currToken_.getType() == my::TokenType::CONTINUE) {
     advance(); // skip 'break' / 'continue'
@@ -112,11 +111,11 @@ void Parser::parseInstruction() {
     parseAssignment();
   } else if (currToken_.getType() == my::TokenType::RETURN) {
     advance(); // skip 'return'
-    advance();
-    // parseExpression();
+    // advance();
+    parseExpression();
   } else if (currToken_.getType() == my::TokenType::IDENTIFIER /*currToken_.getType() != my::TokenType::SEMICOLON*/) {
-    advance();
-    // parseExpression();
+    // advance();
+    parseExpression();
   } else if (currToken_.getType() == my::TokenType::SEMICOLON) {
     advance(); // skip ';'
   } else {
@@ -143,12 +142,10 @@ void Parser::parseInput() {
 void Parser::parseOutput() {
   advance(); // skip 'cout'
   expect(my::TokenType::OUT); // '<<'
-  // parseExpression();
-  expect(my::TokenType::IDENTIFIER); // 'identifier' - for the first time
+  parseExpression();
   while (currToken_.getType() != my::TokenType::SEMICOLON) {
     expect(my::TokenType::OUT); // '<<'
-    // parseExpression();
-    expect(my::TokenType::IDENTIFIER); // 'identifier' - for the first time
+    parseExpression();
   }
   expect(my::TokenType::SEMICOLON); // ';'
 }
@@ -156,7 +153,7 @@ void Parser::parseOutput() {
 void Parser::parseConditional() {
   advance(); // skip 'if'
   expect(my::TokenType::LPAREN); // '('
-  // parseExpression(); // for the first time we haven't any conditions
+  parseExpression(); // for the first time we haven't any conditions
   expect(my::TokenType::RPAREN); // ');
   parseBlock(); // 'block'
 }
@@ -166,7 +163,7 @@ void Parser::parseLoop() {
     advance(); // skip 'while'
 
     expect(my::TokenType::LPAREN); // '('
-    // parseExpression(); // for the first time we haven't any conditions
+    parseExpression(); // for the first time we haven't any conditions
     expect(my::TokenType::RPAREN); // ')'
 
     parseBlock(); // 'block' - loop's body
@@ -176,7 +173,7 @@ void Parser::parseLoop() {
     expect(my::TokenType::LPAREN); // '('
     parseInitialization(); // for the first time we haven't any initializations
     expect(my::TokenType::SEMICOLON); // first ';' after initialization
-    // parseExpression(); // for the first time we haven't any conditions
+    parseExpression(); // for the first time we haven't any conditions
     expect(my::TokenType::SEMICOLON); // second ';' after condition
     // parseStep(); // for the first time we haven't any realizations of parseStep()
     expect(my::TokenType::RPAREN); // ')'
@@ -205,9 +202,9 @@ void Parser::parseInitialization() {
   }
   if (currToken_.getType() != my::TokenType::SEMICOLON) {
     expect(my::TokenType::ASSIGN);
-    advance();
-  }
-  // parseExpression(); // for the first time we haven't any expressions
+    // advance();
+    parseExpression(); // for the first time we haven't any expressions
+}
   // expect(my::TokenType::SEMICOLON); // maybe useful !!!!!!!!!
 }
 
@@ -222,19 +219,19 @@ void Parser::parseAssignment() {
     expect(my::TokenType::ASSIGN);
     advance();
   }
-  // parseExpression(); // for the first time we haven't any expressions
+  parseExpression(); // for the first time we haven't any expressions
   // expect(my::TokenType::SEMICOLON); // maybe useful !!!!!!!!!
 }
 
 void Parser::parseStep() {
   advance();
-  // parseExpression(); // for the first time we haven't any expressions
+  parseExpression(); // for the first time we haven't any expressions
 }
 
 void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 'case'
   advance(); // skip 'switch'
   expect(my::TokenType::LPAREN); // '('
-  // parseExpression(); // for the first time we haven't any conditions
+  parseExpression(); // for the first time we haven't any conditions
   expect(my::TokenType::RPAREN); // ')'
 
   expect(my::TokenType::LBRACE); // '{'
@@ -356,11 +353,25 @@ void Parser::parseMulDiv() {
 
 void Parser::parseUnary() {
   parseAtom();
-  if (currToken_.getType() == my::TokenType::NOT || currToken_.getType() == my::TokenType::MINUS) {
+  if (currToken_.getType() == my::TokenType::NOT) {
     advance(); // skip
   }
 }
 
 void Parser::parseAtom() {
-  advance();
+  if (currToken_.getType() == my::TokenType::KEYWORD &&
+    (currToken_.getValue() == "true" || currToken_.getValue() == "false")) {
+    advance(); // 'true'/'false'
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    parseIdentifier(); // 'identifier'
+  } else if (currToken_.getType() == my::TokenType::LPAREN) { // '(expression)'
+    parseExpression();
+    expect(my::TokenType::RPAREN);
+  } else {
+    parseLiteral(); // 'literal'
+  }
+}
+
+void Parser::parseIdentifier() { // maybe will be rewriting to expect(my::TokenType::IDENTIFIER);
+  expect(my::TokenType::IDENTIFIER);
 }

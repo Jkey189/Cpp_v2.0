@@ -226,7 +226,7 @@ std::string LexicalAnalyzer::getString() {
   }*/
 
   if (!end) {
-    throw std::runtime_error("Lexer error: unexpected token | impossible to use only one `\"'");
+    throw std::runtime_error("Lexer error: unexpected token | impossible to use only one '\"'");
   }
 
   std::string str = program_.substr(start, position_ - start);
@@ -344,7 +344,7 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
 
     if (ch != nextChar && !isSpace(nextChar) && !isEnter(nextChar)) {
       op += nextChar;
-      throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use `" + op + "'");
+      throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use '" + op + "'");
     }
   }
 
@@ -353,7 +353,7 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
       op += nextChar;
     } else {
       op += nextChar;
-      throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use `" + op + "'");
+      throw std::runtime_error("Lexer error: unexpected lexeme | impossible to use '" + op + "'");
     }
   }
 

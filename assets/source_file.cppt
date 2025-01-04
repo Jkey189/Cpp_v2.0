@@ -14,7 +14,7 @@ func int function(int a, int b) {
     }
   }
 
-  while (y - x > -10.5) {
+  while (y / x > -10.5) {
 
     y[5] = 4.5; /*а это присваивание*/
     cout << y;

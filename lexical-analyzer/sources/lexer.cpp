@@ -66,9 +66,13 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
         tokens.emplace_back(my::TokenType::IDENTIFIER, word);
       }
     } else if (currChar == '/') {
-      if (isComment(currChar)) {
+      if (position_ + 1 < program_.size() && program_[position_ + 1] == '*') {
+        ++position_; // Пропускаем '/'
         std::string comment = getComment();
         tokens.emplace_back(my::TokenType::COMMENT_LITERAL, "/*" + comment + "*/");
+      } else {
+        ++position_;
+        tokens.emplace_back(my::TokenType::DIV, "/");
       }
     } else if (isOperator(op)) {
       // std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки

@@ -21,11 +21,7 @@ void Parser::parseFunction() {
   advance();
 
   // is current token - type
-  if (isType(currToken_)) {
-    advance(); // function's type
-  } else {
-    throw std::runtime_error("Syntax error: Expected a type after 'func' || parseFunction()");
-  }
+  parseType();
 
   // check identifier
   expect(my::TokenType::IDENTIFIER); // name of function
@@ -64,8 +60,8 @@ void Parser::parseParameter() {
       "' (" + getTokenValue(currToken_.getType()) + ")." + " || parseParameter()"
       );
   }
+  parseType();
 
-  advance(); // skip type of variable
   expect(my::TokenType::IDENTIFIER); // name of variable
 }
 
@@ -163,7 +159,7 @@ void Parser::parseLoop() {
     advance(); // skip 'while'
 
     expect(my::TokenType::LPAREN); // '('
-    parseExpression(); // for the first time we haven't any conditions
+    parseExpression();
     expect(my::TokenType::RPAREN); // ')'
 
     parseBlock(); // 'block' - loop's body
@@ -171,11 +167,11 @@ void Parser::parseLoop() {
     advance(); // skip 'for'
 
     expect(my::TokenType::LPAREN); // '('
-    parseInitialization(); // for the first time we haven't any initializations
+    parseInitialization();
     expect(my::TokenType::SEMICOLON); // first ';' after initialization
-    parseExpression(); // for the first time we haven't any conditions
+    parseExpression();
     expect(my::TokenType::SEMICOLON); // second ';' after condition
-    // parseStep(); // for the first time we haven't any realizations of parseStep()
+    parseStep();
     expect(my::TokenType::RPAREN); // ')'
 
     parseBlock(); // 'block' - loop's body
@@ -188,16 +184,12 @@ void Parser::parseLoop() {
 }
 
 void Parser::parseInitialization() {
-  if (isType(currToken_)) {
-    advance(); // variable's type
-  } else {
-    throw std::runtime_error("Syntax error: Expected a type after 'func' || parseInitialization()");
-  }
+  parseType();
 
   expect(my::TokenType::IDENTIFIER); // variable's name
   while (currToken_.getType() == my::TokenType::LBRACKET) { // is array's element ([i], [i][j], ...)
     advance(); // '['
-    // parseIndex(); // for the first time we haven't any realizations of parseIndex()
+    parseIndex();
     expect(my::TokenType::RBRACKET); // '['
   }
   if (currToken_.getType() != my::TokenType::SEMICOLON) {
@@ -212,7 +204,7 @@ void Parser::parseAssignment() {
   expect(my::TokenType::IDENTIFIER); // variable's name
   while (currToken_.getType() == my::TokenType::LBRACKET) { // is array's element ([i], [i][j], ...)
     advance(); // '['
-    // parseIndex(); // for the first time we haven't any realizations of parseIndex()
+    parseIndex();
     expect(my::TokenType::RBRACKET); // '['
   }
   if (currToken_.getType() != my::TokenType::SEMICOLON) {
@@ -224,8 +216,9 @@ void Parser::parseAssignment() {
 }
 
 void Parser::parseStep() {
-  advance();
-  parseExpression(); // for the first time we haven't any expressions
+  expect(my::TokenType::IDENTIFIER); // name of variable-count
+  expect(my::TokenType::ASSIGN);
+  parseExpression();
 }
 
 void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 'case'
@@ -372,6 +365,40 @@ void Parser::parseAtom() {
   }
 }
 
+void Parser::parseIndex() {
+  if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    expect(my::TokenType::IDENTIFIER);
+    // parseIdentifier();
+  } else if (currToken_.getType() == my::TokenType::INTEGER_LITERAL) {
+    expect(my::TokenType::INTEGER_LITERAL);
+  } else {
+    throw std::runtime_error(
+    "Syntax error at token: '" + currToken_.getValue() +
+     "' (" + getTokenValue(currToken_.getType()) + "), Expected: " +
+     getTokenValue(my::TokenType::IDENTIFIER) + " or " + getTokenValue(my::TokenType::INTEGER_LITERAL) +
+     " || parseIndex()"
+      );
+  }
+}
+
+void Parser::parseType() {
+  if (isType(currToken_)) {
+    if (currToken_.getType() == my::TokenType::ARRAY) {
+      advance();
+      expect(my::TokenType::LT);
+      parseType();
+      expect(my::TokenType::GT);
+    } else {
+    advance();
+    }
+  } else {
+    throw std::runtime_error("Syntax error: invalid type '" + currToken_.getValue() + "' || pareType()");
+  }
+}
+
 void Parser::parseIdentifier() { // maybe will be rewriting to expect(my::TokenType::IDENTIFIER);
   expect(my::TokenType::IDENTIFIER);
 }
+
+
+// TODO: ';' где-то можно ставить, а где-то нельзя не ставить -- необходимо исправить

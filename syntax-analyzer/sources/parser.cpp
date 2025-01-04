@@ -246,7 +246,7 @@ void Parser::parseStep() {
   parseExpression();
 }
 
-void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 'case'
+void Parser::parseSwitch() {
   const std::string functionName = "parseSwitch()";
 
   advance(); // skip 'switch'
@@ -436,6 +436,3 @@ void Parser::parseIdentifier() { // maybe will be rewriting to expect(my::TokenT
 
   expect(my::TokenType::IDENTIFIER, functionName);
 }
-
-
-// TODO: ';' где-то можно ставить, а где-то нельзя не ставить -- необходимо исправить

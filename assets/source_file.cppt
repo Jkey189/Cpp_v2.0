@@ -3,12 +3,12 @@ func int function(int a, int b) {
 
   for (int i = 0; i < (n - 4); i = i + 1) {
 
-    char x = 'h';
+    char x = 'h'; /*это инициализация*/
     cin >> x;
 
     while (x * 2 != 0) {
 
-      array< array< int > > y;
+      array< array< int > > y; /*это массив*/
       cout << y;
 
     }
@@ -16,7 +16,7 @@ func int function(int a, int b) {
 
   while (y - x > -10.5) {
 
-    float y[5] = 4.5;
+    y[5] = 4.5; /*а это присваивание*/
     cout << y;
 
   }
@@ -76,4 +76,6 @@ func int function(int a, int b) {
 
   cin >> a >> b >> c;
   cout << a << b << c;
+
+  return x; /*i don't no why*/
 }

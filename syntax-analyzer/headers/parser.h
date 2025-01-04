@@ -59,12 +59,12 @@ public:
   [[nodiscard]] LexicalAnalyzer getLexer() const { return lexer_; }
 
 
-  void expect(const my::TokenType type) {
+  void expect(const my::TokenType type, const std::string& functionName) {
     if (currToken_.getType() != type) {
       throw std::runtime_error(
       "Syntax error at token: '" + currToken_.getValue() +
       "' (" + getTokenValue(currToken_.getType()) + "), Expected: " + getTokenValue(type) +
-      " || expect()"
+      " || expect() by " + functionName
       );
     }
     advance(); // probably useless
@@ -125,7 +125,7 @@ public:
     return token.getType() == my::TokenType::INT || token.getType() == my::TokenType::FLOAT ||
       token.getType() == my::TokenType::CHAR || token.getType() == my::TokenType::BOOL ||
         token.getType() == my::TokenType::VOID ||token.getType() == my::TokenType::STRING ||
-          token.getType() == my::TokenType::ARRAY || token.getType() == my::TokenType::IDENTIFIER;
+          token.getType() == my::TokenType::ARRAY;
   }
 
   [[nodiscard]] Token getCurrToken() const { return currToken_; }

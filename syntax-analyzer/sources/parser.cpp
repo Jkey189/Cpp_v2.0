@@ -17,21 +17,23 @@ void Parser::parseDeclaration() {
 }
 
 void Parser::parseFunction() {
-  expect(my::TokenType::KEYWORD); // 'func'
+  const std::string functionName = "parseFunction()";
+
+  expect(my::TokenType::KEYWORD, functionName); // 'func'
   advance();
 
   // is current token - type
   parseType();
 
   // check identifier
-  expect(my::TokenType::IDENTIFIER); // name of function
+  expect(my::TokenType::IDENTIFIER, functionName); // name of function
 
   // check parameters
-  expect(my::TokenType::LPAREN); // '('
+  expect(my::TokenType::LPAREN, functionName); // '('
   if (currToken_.getType() != my::TokenType::RPAREN) { // if we have any parameters
     parseParameters();
   }
-  expect(my::TokenType::RPAREN); // ')'
+  expect(my::TokenType::RPAREN, functionName); // ')'
 
   // check function's body (block)
   parseBlock();
@@ -54,6 +56,7 @@ void Parser::parseParameters() {
 }
 
 void Parser::parseParameter() {
+  const std::string functionName = "parseParameter()";
   if (!isType(currToken_)) {
     throw std::runtime_error(
       "Syntax error: Expected type for parameter, found '" + currToken_.getValue() +
@@ -62,11 +65,13 @@ void Parser::parseParameter() {
   }
   parseType();
 
-  expect(my::TokenType::IDENTIFIER); // name of variable
+  expect(my::TokenType::IDENTIFIER, functionName); // name of variable
 }
 
 void Parser::parseBlock() {
-  expect(my::TokenType::LBRACE); // '{'
+  const std::string functionName = "parseBlock()";
+
+  expect(my::TokenType::LBRACE, functionName); // '{'
 
   while (currToken_.getType() != my::TokenType::RBRACE) {
     if (currToken_.getType() == my::TokenType::END) {
@@ -76,15 +81,19 @@ void Parser::parseBlock() {
     parseInstruction(); // parsing next instruction
   }
 
-  expect(my::TokenType::RBRACE); // '}'
+  expect(my::TokenType::RBRACE, functionName); // '}'
 }
 
 void Parser::parseInstruction() {
+  const std::string functionName = "parseInstruction()";
+
   if (currToken_.getType() == my::TokenType::RBRACE) {
     return; // we haven't any instructions
   }
 
-  if (currToken_.getType() == my::TokenType::LBRACE) {
+  if (currToken_.getType() == my::TokenType::COMMENT_LITERAL) {
+    advance();
+  } else if (currToken_.getType() == my::TokenType::LBRACE) {
     parseBlock();
   } else if (currToken_.getType() == my::TokenType::KEYWORD && currToken_.getValue() == "cin") {
     parseInput();
@@ -101,19 +110,22 @@ void Parser::parseInstruction() {
     advance(); // skip ';'
   } else if (isType(currToken_)) {
     parseInitialization();
-  } else if (currToken_.getType() == my::TokenType::IDENTIFIER &&
-    lexer_.peek(currCount).getType() == my::TokenType::ASSIGN) {
-    // advance();
-    parseAssignment();
   } else if (currToken_.getType() == my::TokenType::RETURN) {
-    advance(); // skip 'return'
-    // advance();
-    parseExpression();
-  } else if (currToken_.getType() == my::TokenType::IDENTIFIER /*currToken_.getType() != my::TokenType::SEMICOLON*/) {
-    // advance();
-    parseExpression();
+    advance(); // Skip 'return'
+    if (currToken_.getType() == my::TokenType::SEMICOLON) {
+      advance(); // 'return;'
+    } else {
+      parseExpression();
+    }
   } else if (currToken_.getType() == my::TokenType::SEMICOLON) {
     advance(); // skip ';'
+  } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
+    if (lexer_.peek(currCount).getType() == my::TokenType::SEMICOLON) {
+      advance(); // skip identifier
+      advance(); // skip ';'
+    } else {
+      parseAssignment();
+    }
   } else {
     throw std::runtime_error(
      "Syntax error at token: '" + currToken_.getValue() +
@@ -125,54 +137,62 @@ void Parser::parseInstruction() {
 }
 
 void Parser::parseInput() {
+  const std::string functionName = "parseInput()";
+
   advance(); // skip 'cin'
-  expect(my::TokenType::IN); // '>>'
-  expect(my::TokenType::IDENTIFIER); // 'variable'
+  expect(my::TokenType::IN, functionName); // '>>'
+  expect(my::TokenType::IDENTIFIER, functionName); // 'variable'
   while (currToken_.getType() != my::TokenType::SEMICOLON) {
-    expect(my::TokenType::IN); // '>>'
-    expect(my::TokenType::IDENTIFIER); // 'variable'
+    expect(my::TokenType::IN, functionName); // '>>'
+    expect(my::TokenType::IDENTIFIER, functionName); // 'variable'
   }
-  expect(my::TokenType::SEMICOLON); // ';'
+  expect(my::TokenType::SEMICOLON, functionName); // ';'
 }
 
 void Parser::parseOutput() {
+  const std::string functionName = "parseOutput()";
+
   advance(); // skip 'cout'
-  expect(my::TokenType::OUT); // '<<'
+  expect(my::TokenType::OUT, functionName); // '<<'
   parseExpression();
   while (currToken_.getType() != my::TokenType::SEMICOLON) {
-    expect(my::TokenType::OUT); // '<<'
+    expect(my::TokenType::OUT, functionName); // '<<'
     parseExpression();
   }
-  expect(my::TokenType::SEMICOLON); // ';'
+  expect(my::TokenType::SEMICOLON, functionName); // ';'
 }
 
 void Parser::parseConditional() {
+  const std::string functionName = "parseConditional()";
+
   advance(); // skip 'if'
-  expect(my::TokenType::LPAREN); // '('
+  expect(my::TokenType::LPAREN, functionName); // '('
   parseExpression(); // for the first time we haven't any conditions
-  expect(my::TokenType::RPAREN); // ');
+  expect(my::TokenType::RPAREN, functionName); // ');
   parseBlock(); // 'block'
 }
 
 void Parser::parseLoop() {
+  const std::string functionName = "parseLoop()";
+
   if (currToken_.getType() == my::TokenType::WHILE) {
     advance(); // skip 'while'
 
-    expect(my::TokenType::LPAREN); // '('
+    expect(my::TokenType::LPAREN, functionName); // '('
     parseExpression();
-    expect(my::TokenType::RPAREN); // ')'
+    expect(my::TokenType::RPAREN, functionName); // ')'
 
     parseBlock(); // 'block' - loop's body
   } else if (currToken_.getType() == my::TokenType::FOR) {
     advance(); // skip 'for'
 
-    expect(my::TokenType::LPAREN); // '('
+    expect(my::TokenType::LPAREN, functionName); // '('
     parseInitialization();
     // expect(my::TokenType::SEMICOLON); // first ';' after initialization
     parseExpression();
-    expect(my::TokenType::SEMICOLON); // second ';' after condition
+    expect(my::TokenType::SEMICOLON, functionName); // second ';' after condition
     parseStep();
-    expect(my::TokenType::RPAREN); // ')'
+    expect(my::TokenType::RPAREN, functionName); // ')'
 
     parseBlock(); // 'block' - loop's body
   } else { // it useless, but - why not?
@@ -184,52 +204,59 @@ void Parser::parseLoop() {
 }
 
 void Parser::parseInitialization() {
+  const std::string functionName = "parseInitialization()";
+
   parseType();
 
-  expect(my::TokenType::IDENTIFIER); // variable's name
+  expect(my::TokenType::IDENTIFIER, functionName); // variable's name
   while (currToken_.getType() == my::TokenType::LBRACKET) { // is array's element ([i], [i][j], ...)
     advance(); // '['
     parseIndex();
-    expect(my::TokenType::RBRACKET); // '['
+    expect(my::TokenType::RBRACKET, functionName); // '['
   }
   if (currToken_.getType() != my::TokenType::SEMICOLON) {
-    expect(my::TokenType::ASSIGN);
+    expect(my::TokenType::ASSIGN, functionName);
     // advance();
     parseExpression(); // for the first time we haven't any expressions
   }
-  expect(my::TokenType::SEMICOLON); // maybe useful !!!!!!!!!
+  expect(my::TokenType::SEMICOLON, functionName); // maybe useful !!!!!!!!!
 }
 
 void Parser::parseAssignment() {
-  expect(my::TokenType::IDENTIFIER); // variable's name
+  const std::string functionName = "parseAssignment()";
+
+  expect(my::TokenType::IDENTIFIER, functionName); // variable's name
   while (currToken_.getType() == my::TokenType::LBRACKET) { // is array's element ([i], [i][j], ...)
     advance(); // '['
     parseIndex();
-    expect(my::TokenType::RBRACKET); // '['
+    expect(my::TokenType::RBRACKET, functionName); // '['
   }
   if (currToken_.getType() != my::TokenType::SEMICOLON) {
-    expect(my::TokenType::ASSIGN);
-    advance();
+    expect(my::TokenType::ASSIGN, functionName);
   }
   parseExpression(); // for the first time we haven't any expressions
-  // expect(my::TokenType::SEMICOLON); // maybe useful !!!!!!!!!
+  expect(my::TokenType::SEMICOLON, functionName); // maybe useful !!!!!!!!!
 }
 
 void Parser::parseStep() {
-  expect(my::TokenType::IDENTIFIER); // name of variable-count
-  expect(my::TokenType::ASSIGN);
+  const std::string functionName = "parseStep()";
+
+  expect(my::TokenType::IDENTIFIER, functionName); // name of variable-count
+  expect(my::TokenType::ASSIGN, functionName);
   parseExpression();
 }
 
 void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 'case'
-  advance(); // skip 'switch'
-  expect(my::TokenType::LPAREN); // '('
-  parseExpression(); // for the first time we haven't any conditions
-  expect(my::TokenType::RPAREN); // ')'
+  const std::string functionName = "parseSwitch()";
 
-  expect(my::TokenType::LBRACE); // '{'
+  advance(); // skip 'switch'
+  expect(my::TokenType::LPAREN, functionName); // '('
+  parseExpression(); // for the first time we haven't any conditions
+  expect(my::TokenType::RPAREN, functionName); // ')'
+
+  expect(my::TokenType::LBRACE, functionName); // '{'
   while (currToken_.getType() == my::TokenType::CASE) {
-    expect(my::TokenType::CASE);
+    expect(my::TokenType::CASE, functionName);
     if (currToken_.getType() == my::TokenType::COMMENT_LITERAL) {
       throw std::runtime_error(
       "Syntax error at token: '" + currToken_.getValue() +
@@ -238,7 +265,7 @@ void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 
       );
     }
     parseLiteral(); // for the first time we haven't any realizations of parseLiteral()
-    expect(my::TokenType::COLON);
+    expect(my::TokenType::COLON, functionName);
     /*while (currToken_.getType() != my::TokenType::CASE &&
          currToken_.getType() != my::TokenType::DEFAULT &&
          currToken_.getType() != my::TokenType::RBRACE) {
@@ -247,33 +274,35 @@ void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 
     while (currToken_.getType() != my::TokenType::BREAK) {
       parseInstruction(); // 'instruction' in case
     }
-    expect(my::TokenType::BREAK); // 'break'
-    expect(my::TokenType::SEMICOLON); // ';'
+    expect(my::TokenType::BREAK, functionName); // 'break'
+    expect(my::TokenType::SEMICOLON, functionName); // ';'
   }
-  expect(my::TokenType::DEFAULT); // 'default'
-  expect(my::TokenType::COLON); // ':'
+  expect(my::TokenType::DEFAULT, functionName); // 'default'
+  expect(my::TokenType::COLON, functionName); // ':'
   while (currToken_.getType() != my::TokenType::RBRACE) {
     parseInstruction(); // 'instruction' in default
   }
-  expect(my::TokenType::RBRACE); // '}'
+  expect(my::TokenType::RBRACE, functionName); // '}'
 }
 
 void Parser::parseLiteral() {
+  const std::string functionName = "parseLiteral()";
+
   if (currToken_.getType() == my::TokenType::COMMENT_LITERAL) {
     // parseCommentLiteral(); // maybe useless methods...
-    expect(my::TokenType::COMMENT_LITERAL);
+    expect(my::TokenType::COMMENT_LITERAL, functionName);
   } else if (currToken_.getType() == my::TokenType::INTEGER_LITERAL) {
     // parseIntegerLiteral(); // maybe useless methods...
-    expect(my::TokenType::INTEGER_LITERAL);
+    expect(my::TokenType::INTEGER_LITERAL, functionName);
 } else if (currToken_.getType() == my::TokenType::FLOAT_LITERAL) {
     // parseFloatLiteral(); // maybe useless methods...
-    expect(my::TokenType::FLOAT_LITERAL);
+    expect(my::TokenType::FLOAT_LITERAL, functionName);
   } else if (currToken_.getType() == my::TokenType::STRING_LITERAL) {
     // parseStringLiteral(); // maybe useless methods...
-    expect(my::TokenType::STRING_LITERAL);
+    expect(my::TokenType::STRING_LITERAL, functionName);
   } else if (currToken_.getType() == my::TokenType::CHAR_LITERAL) {
     // parseCharLiteral(); // maybe useless methods...
-    expect(my::TokenType::CHAR_LITERAL);
+    expect(my::TokenType::CHAR_LITERAL, functionName);
   } else {
     throw std::runtime_error(
       "Syntax error at token: '" + currToken_.getValue() +
@@ -351,6 +380,8 @@ void Parser::parseUnary() {
 }
 
 void Parser::parseAtom() {
+  const std::string functionName = "parseAtom()";
+
   if (currToken_.getType() == my::TokenType::KEYWORD &&
     (currToken_.getValue() == "true" || currToken_.getValue() == "false")) {
     advance(); // 'true'/'false'
@@ -359,18 +390,20 @@ void Parser::parseAtom() {
   } else if (currToken_.getType() == my::TokenType::LPAREN) { // '(expression)'
     advance();
     parseExpression();
-    expect(my::TokenType::RPAREN);
+    expect(my::TokenType::RPAREN, functionName);
   } else {
     parseLiteral(); // 'literal'
   }
 }
 
 void Parser::parseIndex() {
+  const std::string functionName = "parseIndex()";
+
   if (currToken_.getType() == my::TokenType::IDENTIFIER) {
-    expect(my::TokenType::IDENTIFIER);
+    expect(my::TokenType::IDENTIFIER, functionName);
     // parseIdentifier();
   } else if (currToken_.getType() == my::TokenType::INTEGER_LITERAL) {
-    expect(my::TokenType::INTEGER_LITERAL);
+    expect(my::TokenType::INTEGER_LITERAL, functionName);
   } else {
     throw std::runtime_error(
     "Syntax error at token: '" + currToken_.getValue() +
@@ -382,12 +415,14 @@ void Parser::parseIndex() {
 }
 
 void Parser::parseType() {
+  const std::string functionName = "parseType()";
+
   if (isType(currToken_)) {
     if (currToken_.getType() == my::TokenType::ARRAY) {
       advance();
-      expect(my::TokenType::LT);
+      expect(my::TokenType::LT, functionName);
       parseType();
-      expect(my::TokenType::GT);
+      expect(my::TokenType::GT, functionName);
     } else {
     advance();
     }
@@ -397,7 +432,9 @@ void Parser::parseType() {
 }
 
 void Parser::parseIdentifier() { // maybe will be rewriting to expect(my::TokenType::IDENTIFIER);
-  expect(my::TokenType::IDENTIFIER);
+  const std::string functionName = "parseIdentifier()";
+
+  expect(my::TokenType::IDENTIFIER, functionName);
 }
 
 

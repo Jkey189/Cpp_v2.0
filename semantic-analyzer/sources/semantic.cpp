@@ -16,6 +16,8 @@ void SemanticAnalyzer::analyze() {
 }
 
 void SemanticAnalyzer::checkFunction(const Token& token) const {
+  const std::string functionName = "checkFunction() | semantic";
+
   parser_.advance(); // Пропускаем `func`
 
   // Проверяем возвращаемый тип
@@ -34,11 +36,11 @@ void SemanticAnalyzer::checkFunction(const Token& token) const {
   parser_.advance();
 
   // Пропускаем параметры функции
-  parser_.expect(my::TokenType::LPAREN);
+  parser_.expect(my::TokenType::LPAREN, functionName);
   while (parser_.getCurrToken().getType() != my::TokenType::RPAREN) {
     parser_.advance();
   }
-  parser_.expect(my::TokenType::RPAREN);
+  parser_.expect(my::TokenType::RPAREN, functionName);
 }
 
 void SemanticAnalyzer::checkVariable(const Token& token) {
@@ -87,9 +89,11 @@ void SemanticAnalyzer::checkVariable(const Token& token) {
 }
 
 void SemanticAnalyzer::checkAssignment(const Token& token) {
+  const std::string functionName = "checkAssignment() | semantic";
+
   checkVariable(token);
   parser_.advance(); // Пропускаем идентификатор
-  parser_.expect(my::TokenType::ASSIGN);
+  parser_.expect(my::TokenType::ASSIGN, functionName);
 
   // Проверка типа переменной и значения
   Token valueToken = parser_.getCurrToken();

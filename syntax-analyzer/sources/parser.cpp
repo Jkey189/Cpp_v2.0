@@ -168,7 +168,7 @@ void Parser::parseLoop() {
 
     expect(my::TokenType::LPAREN); // '('
     parseInitialization();
-    expect(my::TokenType::SEMICOLON); // first ';' after initialization
+    // expect(my::TokenType::SEMICOLON); // first ';' after initialization
     parseExpression();
     expect(my::TokenType::SEMICOLON); // second ';' after condition
     parseStep();
@@ -196,8 +196,8 @@ void Parser::parseInitialization() {
     expect(my::TokenType::ASSIGN);
     // advance();
     parseExpression(); // for the first time we haven't any expressions
-}
-  // expect(my::TokenType::SEMICOLON); // maybe useful !!!!!!!!!
+  }
+  expect(my::TokenType::SEMICOLON); // maybe useful !!!!!!!!!
 }
 
 void Parser::parseAssignment() {
@@ -246,7 +246,6 @@ void Parser::parseSwitch() { // TODO: fix unused ';' in the last instruction in 
          }*/
     while (currToken_.getType() != my::TokenType::BREAK) {
       parseInstruction(); // 'instruction' in case
-      // expect(my::TokenType::SEMICOLON); // TODO: check 52:8 (source_file.cppt / "Big example for parser")
     }
     expect(my::TokenType::BREAK); // 'break'
     expect(my::TokenType::SEMICOLON); // ';'
@@ -358,6 +357,7 @@ void Parser::parseAtom() {
   } else if (currToken_.getType() == my::TokenType::IDENTIFIER) {
     parseIdentifier(); // 'identifier'
   } else if (currToken_.getType() == my::TokenType::LPAREN) { // '(expression)'
+    advance();
     parseExpression();
     expect(my::TokenType::RPAREN);
   } else {

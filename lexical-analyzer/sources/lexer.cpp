@@ -68,7 +68,7 @@ std::vector<Token> LexicalAnalyzer::tokenize() {
     } else if (currChar == '/') {
       if (isComment(currChar)) {
         std::string comment = getComment();
-        tokens.emplace_back(my::TokenType::COMMENT_LITERAL, "\"" + comment + "\"");
+        tokens.emplace_back(my::TokenType::COMMENT_LITERAL, "/*" + comment + "*/");
       }
     } else if (isOperator(op)) {
       // std::cout << "We've found operator!" << std::endl << std::endl; // Для проверки
@@ -315,7 +315,7 @@ bool LexicalAnalyzer::isOperator(std::string& op) const {
   const char ch = program_[position_];
   op = std::string(1, ch);
 
-  if (ch == ',' || ch == ':' || ch == ';' || ch == '\\') {
+  if (ch == ',' || ch == ':' || ch == ';') {
     return true;
   }
 

@@ -1,6 +1,5 @@
 true
 false
-const
 cin
 cout
 func

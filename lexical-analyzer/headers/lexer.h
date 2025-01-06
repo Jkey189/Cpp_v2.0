@@ -25,7 +25,6 @@ public:
     return tokens;
   }
 
-
 private:
   size_t ind = 0;
   std::string program_;

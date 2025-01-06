@@ -2,62 +2,61 @@
 #define SEMANTIC_H
 
 
-#include "../../includes/libraries.h"
-#include "../../syntax-analyzer/headers/parser.h"
+#include <utility>
 
-
-class TID {
-public:
-  explicit TID() : symbolTable_(std::map<std::string, my::TokenType>()) {}
-  explicit TID(const std::map<std::string, my::TokenType>& symbolTable)
-    : symbolTable_(symbolTable) {}
-
-  bool exists(const std::string& name) const {
-    return symbolTable_.contains(name);
-  }
-
-  void add(const std::string& name, const my::TokenType type) {
-    if (exists(name)) {
-      throw std::runtime_error("Semantic error: variable '" + name + "' is already declared.");
-    }
-    symbolTable_[name] = type;
-  }
-
-  my::TokenType getType(const std::string& name) const {
-    const auto it = symbolTable_.find(name);
-    if (it == symbolTable_.end()) {
-      throw std::runtime_error("Semantic error: variable '" + name + "' is not declared.");
-    }
-    return it->second;
-  }
-
-private:
-  std::map<std::string, my::TokenType> symbolTable_;
-};
+#include "tid.h"
+#include "ast-node.h"
 
 
 class SemanticAnalyzer {
 public:
-  explicit SemanticAnalyzer(Parser& parser, TID& tid)
-    : parser_(parser), tid_(tid) {}
+  explicit SemanticAnalyzer(TID  tid, const std::stack<std::string>& scopes) :
+  tid_(std::move(tid)), scopeStack_(scopes) {}
 
-  void analyze();
-
-  std::vector<std::string> generateRPN();
-
+  void analyze(const ASTNode& root); // Entry point for analysis
 
 private:
-  Parser& parser_;
-  TID& tid_;
+  TID tid_;                         // Table of identifiers
+  std::stack<std::string> scopeStack_; // Stack for tracking scopes
 
-  void checkFunction(const Token& token) const;
-  void checkVariable(const Token& token);
-  void checkAssignment(const Token& token);
-  void checkExpression(const Token& token);
+  void enterScope(const std::string& scopeName);
+  void exitScope();
+  std::string currentScope() const;
 
-  static int getPrecedence(const std::string &op);
+  void analyzeNode(const ASTNode& node);
+
+  void analyzeProgram(const ASTNode& node);
+
+  void analyzeFunction(const ASTNode& node);
+
+  void analyzeBlock(const ASTNode& node);
+
+  void analyzeVariable(const ASTNode& node);
+
+  void analyzeAssignment(const ASTNode& node);
+
+  void analyzeExpression(const ASTNode& node);
+
+  void analyzeLiteral(const ASTNode& node);
+
+  void analyzeIdentifier(const ASTNode& node);
+
+  void analyzeIf(const ASTNode& node);
+
+  void analyzeLoop(const ASTNode& node);
+
+  void analyzeReturn(const ASTNode& node);
+
+  void analyzeInput(const ASTNode& node);
+
+  void analyzeOutput(const ASTNode& node);
+
+  void analyzeSwitch(const ASTNode& node);
+
+  void analyzeBreak(const ASTNode& node);
+
+  void analyzeContinue(const ASTNode& node);
 };
-
 
 
 #endif //SEMANTIC_H

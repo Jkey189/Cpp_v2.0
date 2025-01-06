@@ -1,290 +1,208 @@
 #include "../headers/semantic.h"
 
-void SemanticAnalyzer::analyze() {
-  while (parser_.getCurrToken().getType() != my::TokenType::END) {
-    if (Token token = parser_.getCurrToken(); token.getType() == my::TokenType::KEYWORD && token.getValue() == "func") {
-      checkFunction(token);
-    } else if (token.getType() == my::TokenType::IDENTIFIER) {
-      if (parser_.getLexer().peek(1).getType() == my::TokenType::ASSIGN) {
-        checkAssignment(token);
-      } else {
-        checkVariable(token);
-      }
-    }
-    parser_.advance();
+void SemanticAnalyzer::analyze(const ASTNode& root) {
+  try {
+    analyzeNode(root);
+  } catch (const std::exception& e) {
+    throw std::runtime_error("Semantic analysis failed: " + std::string(e.what()));
   }
 }
 
-void SemanticAnalyzer::checkFunction(const Token& token) const {
-  const std::string functionName = "checkFunction() | semantic";
-
-  parser_.advance(); // Пропускаем `func`
-
-  // Проверяем возвращаемый тип
-  const Token typeToken = parser_.getCurrToken();
-  if (!parser_.isType(typeToken)) {
-    throw std::runtime_error("Semantic error: invalid return type '" + typeToken.getValue() + "'.");
-  }
-  parser_.advance();
-
-  // Проверяем имя функции
-  const Token nameToken = parser_.getCurrToken();
-  if (tid_.exists(nameToken.getValue())) {
-    throw std::runtime_error("Semantic error: function name '" + nameToken.getValue() + "' is already used.");
-  }
-  tid_.add(nameToken.getValue(), typeToken.getType());
-  parser_.advance();
-
-  // Пропускаем параметры функции
-  parser_.expect(my::TokenType::LPAREN, functionName);
-  while (parser_.getCurrToken().getType() != my::TokenType::RPAREN) {
-    parser_.advance();
-  }
-  parser_.expect(my::TokenType::RPAREN, functionName);
+void SemanticAnalyzer::enterScope(const std::string& scopeName) {
+  scopeStack_.push(scopeName);
 }
 
-void SemanticAnalyzer::checkVariable(const Token& token) {
-  // Проверяем, объявлена ли переменная
-  if (!tid_.exists(token.getValue())) {
-    throw std::runtime_error("Semantic error: variable '" + token.getValue() +
-                             "' not declared at line " + std::to_string(token.getLine()) +
-                             ", column " + std::to_string(token.getColumn()) + ".");
-  }
-
-  // Проверяем, если это часть присваивания, совпадают ли типы lvalue и rvalue
-  if (parser_.getCurrToken().getType() == my::TokenType::ASSIGN) {
-    parser_.advance(); // Пропускаем '='
-    Token nextToken = parser_.getCurrToken();
-
-    // Получаем тип переменной (lvalue)
-    my::TokenType variableType = tid_.getType(token.getValue());
-
-    // Определяем тип rvalue
-    my::TokenType valueType;
-    if (nextToken.getType() == my::TokenType::IDENTIFIER) {
-      if (!tid_.exists(nextToken.getValue())) {
-        throw std::runtime_error("Semantic error: variable '" + nextToken.getValue() +
-                                 "' not declared at line " + std::to_string(nextToken.getLine()) +
-                                 ", column " + std::to_string(nextToken.getColumn()) + ".");
-      }
-      valueType = tid_.getType(nextToken.getValue());
-    } else if (nextToken.getType() == my::TokenType::INTEGER_LITERAL ||
-               nextToken.getType() == my::TokenType::FLOAT_LITERAL ||
-               nextToken.getType() == my::TokenType::STRING_LITERAL ||
-               nextToken.getType() == my::TokenType::CHAR_LITERAL) {
-      valueType = nextToken.getType();
-    } else {
-      throw std::runtime_error("Semantic error: invalid value assigned to variable '" +
-                               token.getValue() + "' at line " + std::to_string(nextToken.getLine()) +
-                               ", column " + std::to_string(nextToken.getColumn()) + ".");
-    }
-
-    // Проверяем соответствие типов
-    if (variableType != valueType) {
-      throw std::runtime_error("Semantic error: type mismatch in assignment to '" +
-                               token.getValue() + "' at line " + std::to_string(token.getLine()) +
-                               ", column " + std::to_string(token.getColumn()) + ".");
-    }
+void SemanticAnalyzer::exitScope() {
+  if (!scopeStack_.empty()) {
+    scopeStack_.pop();
+  } else {
+    throw std::runtime_error("Attempt to exit scope when none exists.");
   }
 }
 
-void SemanticAnalyzer::checkAssignment(const Token& token) {
-  const std::string functionName = "checkAssignment() | semantic";
-
-  checkVariable(token);
-  parser_.advance(); // Пропускаем идентификатор
-  parser_.expect(my::TokenType::ASSIGN, functionName);
-
-  // Проверка типа переменной и значения
-  Token valueToken = parser_.getCurrToken();
-  my::TokenType variableType = tid_.getType(token.getValue());
-  if (variableType != valueToken.getType()) {
-    throw std::runtime_error("Semantic error: type mismatch for variable '" + token.getValue() +
-      "' (expected: " + getTokenValue(variableType) + ", got: " + getTokenValue(valueToken.getType()) + ").");
-  }
-  parser_.advance();
+std::string SemanticAnalyzer::currentScope() const {
+  return scopeStack_.empty() ? "global" : scopeStack_.top();
 }
 
-void SemanticAnalyzer::checkExpression(const Token& token) {
-  // Следим за состоянием выражения
-  bool expectOperator = false; // Ожидаем ли оператор
-  bool expectOperand = true;   // Ожидаем ли операнд
-
-  while (parser_.getCurrToken().getType() != my::TokenType::SEMICOLON &&
-         parser_.getCurrToken().getType() != my::TokenType::RPAREN &&
-         parser_.getCurrToken().getType() != my::TokenType::END) {
-    Token currToken = parser_.getCurrToken();
-
-    // Если токен - идентификатор
-    if (currToken.getType() == my::TokenType::IDENTIFIER) {
-      // Проверяем, объявлена ли переменная
-      checkVariable(currToken);
-
-      // Если ожидаем оператор, значит идентификатор не на своем месте
-      if (expectOperator) {
-        throw std::runtime_error("Semantic error: unexpected identifier '" + currToken.getValue() +
-                                 "' at line " + std::to_string(currToken.getLine()) +
-                                 ", column " + std::to_string(currToken.getColumn()) +
-                                 ". Expected an operator.");
-      }
-
-      // Переключаем ожидания
-      expectOperator = true;
-      expectOperand = false;
-    }
-
-    // Если токен - литерал (целочисленный, строковый, вещественный, символ)
-    else if (currToken.getType() == my::TokenType::INTEGER_LITERAL ||
-             currToken.getType() == my::TokenType::FLOAT_LITERAL ||
-             currToken.getType() == my::TokenType::STRING_LITERAL ||
-             currToken.getType() == my::TokenType::CHAR_LITERAL) {
-      // Литералы допустимы, если мы ожидаем операнд
-      if (!expectOperand) {
-        throw std::runtime_error("Semantic error: unexpected literal '" + currToken.getValue() +
-                                 "' at line " + std::to_string(currToken.getLine()) +
-                                 ", column " + std::to_string(currToken.getColumn()) +
-                                 ". Expected an operator.");
-      }
-
-      // Переключаем ожидания
-      expectOperator = true;
-      expectOperand = false;
-    }
-
-    // Если токен - оператор (например, +, -, *, /)
-    else if (currToken.getType() == my::TokenType::PLUS || currToken.getType() == my::TokenType::MINUS ||
-             currToken.getType() == my::TokenType::MUL || currToken.getType() == my::TokenType::DIV ||
-             currToken.getType() == my::TokenType::EQ || currToken.getType() == my::TokenType::NEQ ||
-             currToken.getType() == my::TokenType::AND || currToken.getType() == my::TokenType::OR ||
-             currToken.getType() == my::TokenType::LT || currToken.getType() == my::TokenType::GT) {
-      // Операторы допустимы, если мы ожидаем оператор
-      if (!expectOperator) {
-        throw std::runtime_error("Semantic error: unexpected operator '" + currToken.getValue() +
-                                 "' at line " + std::to_string(currToken.getLine()) +
-                                 ", column " + std::to_string(currToken.getColumn()) +
-                                 ". Expected an operand.");
-      }
-
-      // Переключаем ожидания
-      expectOperator = false;
-      expectOperand = true;
-    }
-
-    // Если токен - открывающая скобка (для группировки)
-    else if (currToken.getType() == my::TokenType::LPAREN) {
-      if (!expectOperand) {
-        throw std::runtime_error("Semantic error: unexpected '(' at line " +
-                                 std::to_string(currToken.getLine()) +
-                                 ", column " + std::to_string(currToken.getColumn()) +
-                                 ". Expected an operator.");
-      }
-      parser_.advance(); // Пропускаем '('
-      checkExpression(currToken); // Рекурсивно проверяем содержимое скобок
-      if (parser_.getCurrToken().getType() != my::TokenType::RPAREN) {
-        throw std::runtime_error("Semantic error: missing closing ')' at line " +
-                                 std::to_string(currToken.getLine()) +
-                                 ", column " + std::to_string(currToken.getColumn()) + ".");
-      }
-    }
-
-    // Если токен - закрывающая скобка (она будет обработана в вызове выше)
-    else if (currToken.getType() == my::TokenType::RPAREN) {
-      break; // Выходим из проверки
-    }
-
-    // Если токен неизвестный
-    else {
-      throw std::runtime_error("Semantic error: invalid token '" + currToken.getValue() +
-                               "' at line " + std::to_string(currToken.getLine()) +
-                               ", column " + std::to_string(currToken.getColumn()) + ".");
-    }
-
-    // Продвигаемся к следующему токену
-    parser_.advance();
-  }
-
-  // Если в конце выражения ожидается операнд, но мы достигли конца - ошибка
-  if (expectOperand) {
-    throw std::runtime_error("Semantic error: incomplete expression at line " +
-                             std::to_string(token.getLine()) + ", column " +
-                             std::to_string(token.getColumn()) + ".");
+void SemanticAnalyzer::analyzeNode(const ASTNode& node) {
+  switch (node.getType()) {
+    case ASTNodeType::PROGRAM:
+      analyzeProgram(node);
+      break;
+    case ASTNodeType::FUNCTION:
+      analyzeFunction(node);
+      break;
+    case ASTNodeType::BLOCK:
+      analyzeBlock(node);
+      break;
+    case ASTNodeType::VARIABLE_DECLARATION:
+      analyzeVariable(node);
+      break;
+    case ASTNodeType::ASSIGNMENT:
+      analyzeAssignment(node);
+      break;
+    case ASTNodeType::EXPRESSION:
+      analyzeExpression(node);
+      break;
+    case ASTNodeType::LITERAL:
+      analyzeLiteral(node);
+      break;
+    case ASTNodeType::IDENTIFIER:
+      analyzeIdentifier(node);
+      break;
+    case ASTNodeType::IF_STATEMENT:
+      analyzeIf(node);
+      break;
+    case ASTNodeType::LOOP_STATEMENT:
+      analyzeLoop(node);
+      break;
+    case ASTNodeType::RETURN_STATEMENT:
+      analyzeReturn(node);
+      break;
+    case ASTNodeType::INPUT:
+      analyzeInput(node);
+      break;
+    case ASTNodeType::OUTPUT:
+      analyzeOutput(node);
+      break;
+    case ASTNodeType::SWITCH:
+      analyzeSwitch(node);
+      break;
+    case ASTNodeType::BREAK:
+      analyzeBreak(node);
+      break;
+    case ASTNodeType::CONTINUE:
+      analyzeContinue(node);
+      break;
+    default:
+      throw std::runtime_error("Unknown AST node type encountered.");
   }
 }
 
-std::vector<std::string> SemanticAnalyzer::generateRPN() {
-  std::vector<std::string> output; // Финальный ПОЛИЗ
-  std::stack<std::string> operators; // Стек операторов
-
-  while (parser_.getCurrToken().getType() != my::TokenType::SEMICOLON &&
-         parser_.getCurrToken().getType() != my::TokenType::END) {
-    Token currToken = parser_.getCurrToken();
-
-    // Если это литерал или идентификатор
-    if (currToken.getType() == my::TokenType::IDENTIFIER ||
-        currToken.getType() == my::TokenType::INTEGER_LITERAL ||
-        currToken.getType() == my::TokenType::FLOAT_LITERAL ||
-        currToken.getType() == my::TokenType::STRING_LITERAL ||
-        currToken.getType() == my::TokenType::CHAR_LITERAL) {
-      output.push_back(currToken.getValue());
-      parser_.advance();
-    }
-
-    // Если это оператор
-    else if (currToken.getType() == my::TokenType::PLUS ||
-             currToken.getType() == my::TokenType::MINUS ||
-             currToken.getType() == my::TokenType::MUL ||
-             currToken.getType() == my::TokenType::DIV) {
-      while (!operators.empty() && getPrecedence(operators.top()) >= getPrecedence(currToken.getValue())) {
-        output.push_back(operators.top());
-        operators.pop();
-      }
-      operators.push(currToken.getValue());
-      parser_.advance();
-    }
-
-    // Если это открывающая скобка
-    else if (currToken.getType() == my::TokenType::LPAREN) {
-      operators.push(currToken.getValue());
-      parser_.advance();
-    }
-
-    // Если это закрывающая скобка
-    else if (currToken.getType() == my::TokenType::RPAREN) {
-      while (!operators.empty() && operators.top() != "(") {
-        output.push_back(operators.top());
-        operators.pop();
-      }
-      if (operators.empty()) {
-        throw std::runtime_error("Semantic error: mismatched parentheses.");
-      }
-      operators.pop(); // Убираем '(' из стека
-      parser_.advance();
-    }
-
-    // Любой другой случай - ошибка
-    else {
-      throw std::runtime_error("Semantic error: unexpected token '" + currToken.getValue() +
-                               "' at line " + std::to_string(currToken.getLine()) +
-                               ", column " + std::to_string(currToken.getColumn()) + ".");
-    }
+void SemanticAnalyzer::analyzeProgram(const ASTNode& node) {
+  for (const auto& child : node.getChildren()) {
+    analyzeNode(*child);
   }
-
-  // Выгружаем оставшиеся операторы
-  while (!operators.empty()) {
-    if (operators.top() == "(") {
-      throw std::runtime_error("Semantic error: mismatched parentheses.");
-    }
-    output.push_back(operators.top());
-    operators.pop();
-  }
-
-  return output;
 }
 
+void SemanticAnalyzer::analyzeFunction(const ASTNode& node) {
+  const std::string& functionName = node.getValue();
 
-// Вспомогательный метод для приоритетов операций
-int SemanticAnalyzer::getPrecedence(const std::string& op) {
-  if (op == "+" || op == "-") return 1;
-  if (op == "*" || op == "/") return 2;
-  return 0;
+  if (tid_.identifierExists(functionName, "global")) {
+    throw std::runtime_error("Function '" + functionName + "' is already declared in the global scope.");
+  }
+
+  tid_.addIdentifier(functionName, IdentifierType::FUNCTION, "global");
+  enterScope(functionName);
+
+  for (const auto& child : node.getChildren()) {
+    analyzeNode(*child);
+  }
+
+  exitScope();
+}
+
+void SemanticAnalyzer::analyzeBlock(const ASTNode& node) {
+  enterScope("block_" + std::to_string(reinterpret_cast<std::uintptr_t>(&node)));
+
+  for (const auto& child : node.getChildren()) {
+    analyzeNode(*child);
+  }
+
+  exitScope();
+}
+
+void SemanticAnalyzer::analyzeVariable(const ASTNode& node) {
+  const std::string& varName = node.getValue();
+  IdentifierType varType = IdentifierType::UNKNOWN; // Placeholder, extract type from node if available
+
+  if (tid_.identifierExists(varName, currentScope())) {
+    throw std::runtime_error("Variable '" + varName + "' is already declared in scope '" + currentScope() + "'.");
+  }
+
+  tid_.addIdentifier(varName, varType, currentScope());
+}
+
+void SemanticAnalyzer::analyzeAssignment(const ASTNode& node) {
+  const auto& varNode = node.getChildren().at(0);
+  if (!tid_.identifierExists(varNode->getValue(), currentScope())) {
+    throw std::runtime_error("Variable '" + varNode->getValue() + "' is not declared in scope '" + currentScope() + "'.");
+  }
+
+  tid_.markAsInitialized(varNode->getValue(), currentScope());
+  analyzeExpression(*node.getChildren().at(1));
+}
+
+void SemanticAnalyzer::analyzeExpression(const ASTNode& node) {
+  for (const auto& child : node.getChildren()) {
+    analyzeNode(*child);
+  }
+}
+
+void SemanticAnalyzer::analyzeLiteral(const ASTNode& node) {
+  // Literals are self-contained; no additional analysis required.
+}
+
+void SemanticAnalyzer::analyzeIdentifier(const ASTNode& node) {
+  const std::string& identifier = node.getValue();
+
+  if (!tid_.identifierExists(identifier, currentScope())) {
+    throw std::runtime_error("Identifier '" + identifier + "' is not declared in scope '" + currentScope() + "'.");
+  }
+
+  tid_.markAsUsed(identifier, currentScope());
+}
+
+void SemanticAnalyzer::analyzeIf(const ASTNode& node) {
+  analyzeExpression(*node.getChildren().at(0));
+  analyzeBlock(*node.getChildren().at(1));
+
+  if (node.getChildren().size() > 2) {
+    analyzeBlock(*node.getChildren().at(2));
+  }
+}
+
+void SemanticAnalyzer::analyzeLoop(const ASTNode& node) {
+  analyzeExpression(*node.getChildren().at(0));
+  enterScope("loop");
+  analyzeBlock(*node.getChildren().at(1));
+  exitScope();
+}
+
+void SemanticAnalyzer::analyzeReturn(const ASTNode& node) {
+  if (!node.getChildren().empty()) {
+    analyzeExpression(*node.getChildren().at(0));
+  }
+}
+
+void SemanticAnalyzer::analyzeInput(const ASTNode& node) {
+  for (const auto& child : node.getChildren()) {
+    analyzeIdentifier(*child);
+  }
+}
+
+void SemanticAnalyzer::analyzeOutput(const ASTNode& node) {
+  for (const auto& child : node.getChildren()) {
+    analyzeExpression(*child);
+  }
+}
+
+void SemanticAnalyzer::analyzeSwitch(const ASTNode& node) {
+  analyzeExpression(*node.getChildren().at(0));
+
+  for (std::size_t i = 1; i < node.getChildren().size(); ++i) {
+    analyzeBlock(*node.getChildren().at(i));
+  }
+}
+
+void SemanticAnalyzer::analyzeBreak(const ASTNode& node) {
+  if (scopeStack_.empty() || scopeStack_.top() != "loop") {
+    throw std::runtime_error("Break statement is not inside a loop.");
+  }
+}
+
+void SemanticAnalyzer::analyzeContinue(const ASTNode& node) {
+  if (scopeStack_.empty() || scopeStack_.top() != "loop") {
+    throw std::runtime_error("Continue statement is not inside a loop.");
+  }
 }

@@ -13,7 +13,7 @@ enum class IdentifierType {
 };
 
 struct IdentifierInfo {
-  explicit IdentifierInfo(std::string  iName, std::string  iScope,
+  explicit IdentifierInfo(std::string iName, std::string iScope,
     const IdentifierType& iType,
     const bool iIsInitialized, const bool iIsUsed,
     std::string  iAdditionalInfo) : name(std::move(iName)), scope(std::move(iScope)),

@@ -7,6 +7,7 @@
 #include "../../global_functions/global_funcs.h"
 #include "../../includes/libraries.h"
 #include "../../lexical-analyzer/headers/lexer.h"
+#include "../../semantic-analyzer/headers/semantic.h"
 
 
 class Parser {

@@ -1,6 +1,32 @@
 #include "../headers/parser.h"
 
 
+IdentifierType convertFromTokenTypeToIdentifierType(const my::TokenType& type) {
+  switch (type) {
+  case my::TokenType::INT:
+    return IdentifierType::INT;
+  case my::TokenType::FLOAT:
+    return IdentifierType::FLOAT;
+  case my::TokenType::CHAR:
+    return IdentifierType::CHAR;
+  case my::TokenType::BOOL:
+    return IdentifierType::BOOL;
+  case my::TokenType::VOID:
+    return IdentifierType::VOID;
+  case my::TokenType::STRING:
+    return IdentifierType::STRING;
+  case my::TokenType::ARRAY:
+    return IdentifierType::ARRAY;
+  default:
+    /*return IdentifierType::UNKNOWN;*/
+    throw std::runtime_error("Syntax-semantic error: invalid identifier type");
+  }
+}
+
+
+SemanticAnalyzer semanticAnalyzer;
+
+
 void Parser::parseProgram() {
   while (currToken_.getType() != my::TokenType::END) {
     parseDeclaration();
@@ -29,17 +55,15 @@ void Parser::parseFunction() {
   expect(my::TokenType::IDENTIFIER, functionName); // name of function
 
   // check parameters
+  semanticAnalyzer.enterScope(functionName);
   expect(my::TokenType::LPAREN, functionName); // '('
   if (currToken_.getType() != my::TokenType::RPAREN) { // if we have any parameters
     parseParameters();
   }
   expect(my::TokenType::RPAREN, functionName); // ')'
 
-  // check function's body (block)
   parseBlock();
-  /*expect(my::TokenType::LBRACE); // '{'
-  parseBlock();                  // block
-  expect(my::TokenType::RBRACE); // '}'*/
+  semanticAnalyzer.exitScope();
 }
 
 void Parser::parseParameters() {
@@ -65,6 +89,8 @@ void Parser::parseParameter() {
   }
   parseType();
 
+  semanticAnalyzer.declareIdentifier(currToken_.getValue(),
+    convertFromTokenTypeToIdentifierType(currToken_.getType()));
   expect(my::TokenType::IDENTIFIER, functionName); // name of variable
 }
 
@@ -73,6 +99,8 @@ void Parser::parseBlock() {
 
   expect(my::TokenType::LBRACE, functionName); // '{'
 
+  semanticAnalyzer.enterScope("block"); // VARY BAD - fix in future
+
   while (currToken_.getType() != my::TokenType::RBRACE) {
     if (currToken_.getType() == my::TokenType::END) {
       throw std::runtime_error("Syntax error: Unexpected end of input inside block || parseBlock()");
@@ -80,6 +108,8 @@ void Parser::parseBlock() {
 
     parseInstruction(); // parsing next instruction
   }
+
+  semanticAnalyzer.exitScope();
 
   expect(my::TokenType::RBRACE, functionName); // '}'
 }
@@ -206,7 +236,11 @@ void Parser::parseLoop() {
 void Parser::parseInitialization() {
   const std::string functionName = "parseInitialization()";
 
+  const IdentifierType type = convertFromTokenTypeToIdentifierType(currToken_.getType());
+
   parseType();
+
+  semanticAnalyzer.declareIdentifier(currToken_.getValue(), type);
 
   expect(my::TokenType::IDENTIFIER, functionName); // variable's name
   while (currToken_.getType() == my::TokenType::LBRACKET) { // is array's element ([i], [i][j], ...)

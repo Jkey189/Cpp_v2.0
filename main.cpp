@@ -103,7 +103,7 @@ int main() {
     std::cout << "Syntax analyzer has completed successfully!" << std::endl;
 
     // Semantic analysis
-    try {
+    /*try {
       // start semantic here:
       TID tid;
       SemanticAnalyzer semantic(tid, );
@@ -111,7 +111,7 @@ int main() {
     } catch (const std::exception& e) {
       std::cerr << "Semantic analysis error: " << e.what() << std::endl;
       return -1;
-    }
+    }*/
   } catch (const std::exception& e) {
     std::cerr << "Parser's errors: " << e.what() << std::endl;
     return -4;

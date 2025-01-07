@@ -6,6 +6,10 @@ func int function(int a, int b) {
     char x = 'h'; /*это инициализация*/
     cin >> x;
 
+    {
+      
+    }
+
     while (x * 2 != 0) {
 
       array< array< int > > y; /*это массив*/

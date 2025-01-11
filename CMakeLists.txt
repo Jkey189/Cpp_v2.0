@@ -26,12 +26,12 @@ add_executable(Language
         syntax-analyzer/sources/parser.cpp
 
 
-        #[[semantic-analyzer/headers/semantic.h
+        semantic-analyzer/headers/semantic.h
         semantic-analyzer/headers/tid.h
         semantic-analyzer/headers/ast-node.h
+        semantic-analyzer/headers/rpn.h
 
         semantic-analyzer/sources/semantic.cpp
         semantic-analyzer/sources/tid.cpp
-        semantic-analyzer/headers/rpn.h
-        semantic-analyzer/sources/rpn.cpp]]
+        semantic-analyzer/sources/rpn.cpp
 )

@@ -30,24 +30,25 @@ func int function(int a, int b) {
     case 'c':
       int y;
       float x = -5.5;
+      cout << x;
       break;
 
     case "string":
-      int y;
-      float x = 5.5;
+      int y1;
+      float x1 = 5.5;
       break;
 
     case 5:
       switch (b) {
 
         case 5:
-          int y;
-          float x = 5.5;
+          int y2;
+          float x2 = 5.5;
           break;
 
         case 4:
-          int y;
-          float x = 5.5;
+          int y3;
+          float x3 = 5.5;
           break;
 
         default:

@@ -44,6 +44,7 @@ public:
     }
 
     currToken_ = tokens[currCount++];
+    std::cout << std::endl;
     std::cout << "Advanced to token: '" << currToken_.getValue() << "'" << std::endl;
   }
 

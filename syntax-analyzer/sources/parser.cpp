@@ -2,24 +2,25 @@
 
 
 IdentifierType convertFromTokenTypeToIdentifierType(const my::TokenType& type) {
+  std::cout << "Converting token type: " << getTokenValue(type) << std::endl;
   switch (type) {
-  case my::TokenType::INT:
-    return IdentifierType::INT;
-  case my::TokenType::FLOAT:
-    return IdentifierType::FLOAT;
-  case my::TokenType::CHAR:
-    return IdentifierType::CHAR;
-  case my::TokenType::BOOL:
-    return IdentifierType::BOOL;
-  case my::TokenType::VOID:
-    return IdentifierType::VOID;
-  case my::TokenType::STRING:
-    return IdentifierType::STRING;
-  case my::TokenType::ARRAY:
-    return IdentifierType::ARRAY;
-  default:
-    /*return IdentifierType::UNKNOWN;*/
-    throw std::runtime_error("Syntax-semantic error: invalid identifier type");
+    case my::TokenType::INT:
+      return IdentifierType::INT;
+    case my::TokenType::FLOAT:
+      return IdentifierType::FLOAT;
+    case my::TokenType::CHAR:
+      return IdentifierType::CHAR;
+    case my::TokenType::BOOL:
+      return IdentifierType::BOOL;
+    case my::TokenType::VOID:
+      return IdentifierType::VOID;
+    case my::TokenType::STRING:
+      return IdentifierType::STRING;
+    case my::TokenType::ARRAY:
+      return IdentifierType::ARRAY;
+    default:
+      /*return IdentifierType::UNKNOWN;*/
+      throw std::runtime_error("Syntax-semantic error: invalid identifier type");
   }
 }
 
@@ -49,9 +50,15 @@ void Parser::parseFunction() {
   advance();
 
   // is current token - type
+  IdentifierType returnType = convertFromTokenTypeToIdentifierType(currToken_.getType());
   parseType();
 
   // check identifier
+  const std::string funcName = currToken_.getValue();
+
+  // add function to TID
+  semanticAnalyzer.declareIdentifier(funcName, IdentifierType::FUNCTION);
+
   expect(my::TokenType::IDENTIFIER, functionName); // name of function
 
   // check parameters
@@ -81,17 +88,33 @@ void Parser::parseParameters() {
 
 void Parser::parseParameter() {
   const std::string functionName = "parseParameter()";
+
+  const my::TokenType paramTokenType =  currToken_.getType();
+
   if (!isType(currToken_)) {
     throw std::runtime_error(
       "Syntax error: Expected type for parameter, found '" + currToken_.getValue() +
       "' (" + getTokenValue(currToken_.getType()) + ")." + " || parseParameter()"
       );
   }
-  parseType();
+  /*parseType();
 
   semanticAnalyzer.declareIdentifier(currToken_.getValue(),
     convertFromTokenTypeToIdentifierType(currToken_.getType()));
-  expect(my::TokenType::IDENTIFIER, functionName); // name of variable
+  expect(my::TokenType::IDENTIFIER, functionName); // name of variable*/
+
+  // Парсим тип
+  parseType();
+
+  // Получаем идентификатор параметра
+  std::string paramName = currToken_.getValue();
+  expect(my::TokenType::IDENTIFIER, functionName); // Проверяем идентификатор
+
+  // Преобразуем сохраненный тип токена в IdentifierType
+  const IdentifierType paramType = convertFromTokenTypeToIdentifierType(paramTokenType);
+
+  // Добавляем параметр в TID
+  semanticAnalyzer.declareIdentifier(paramName, paramType);
 }
 
 void Parser::parseBlock() {

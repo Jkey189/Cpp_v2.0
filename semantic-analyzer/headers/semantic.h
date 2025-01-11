@@ -10,10 +10,6 @@
 
 
 class SemanticAnalyzer {
-private:
-  TID tid; // Используемый TID
-  std::string currentScope; // Текущая область видимости
-
 public:
   explicit SemanticAnalyzer() : currentScope("global") {}
 
@@ -28,6 +24,10 @@ public:
 
   // Проверки
   void checkType(const std::string& expectedType, const std::string& actualType);
+
+private:
+  TID tid; // Используемый TID
+  std::string currentScope; // Текущая область видимост
 };
 
 
